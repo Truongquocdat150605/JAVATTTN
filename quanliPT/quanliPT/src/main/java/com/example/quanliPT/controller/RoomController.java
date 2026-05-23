@@ -3,6 +3,8 @@ package com.example.quanliPT.controller;
 import com.example.quanliPT.model.Room;
 import com.example.quanliPT.model.RoomStatus;
 import com.example.quanliPT.repository.RoomRepository;
+import com.example.quanliPT.repository.ContractRepository;
+import com.example.quanliPT.model.Contract;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class RoomController {
 
     private final RoomRepository roomRepository;
+    private final ContractRepository contractRepository;
 
     private final String UPLOAD_DIR = "uploads/";
 
@@ -39,6 +42,13 @@ public class RoomController {
     @GetMapping("/available")
     public List<Room> getAvailableRooms() {
         return roomRepository.findByStatus(RoomStatus.AVAILABLE);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
+        return roomRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // ─── POST: Tạo phòng với ảnh (Multipart) ─────────────────────────────────
@@ -183,12 +193,29 @@ public class RoomController {
         }
     }
 
-    // ─── DELETE: Xóa phòng ────────────────────────────────────────────────────
+    // 🟢 DELETE: Xóa phòng 🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-        roomRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteRoom(@PathVariable Long id) {
+        try {
+            Room room = roomRepository.findById(id).orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
+            
+            // Check if room has any active contracts
+            List<Contract> activeContracts = contractRepository.findByRoomIdAndActiveTrue(id);
+            if (activeContracts != null && !activeContracts.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Không thể xóa: Phòng này đang có hợp đồng hoạt động."));
+            }
+
+            // Alternatively check all contracts if needed to prevent foreign key issues
+            // For now, let's assume we allow deletion if no active contract, but DB might throw FK exception if there are old invoices/contracts. 
+            // Better to handle the exception gracefully:
+            roomRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Không thể xóa phòng này vì đã có dữ liệu hợp đồng hoặc hóa đơn liên quan. Khuyên dùng: Đổi trạng thái sang 'Bảo trì' hoặc tạo trạng thái 'Ngưng hoạt động'."));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "Lỗi: " + e.getMessage()));
+        }
     }
 
     // ─── Helper: Lưu ảnh vào ./uploads/ ──────────────────────────────────────

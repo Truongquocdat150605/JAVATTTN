@@ -20,42 +20,41 @@ public class BillingService {
     private final ContractRepository contractRepository;
     private final InvoiceRepository invoiceRepository;
 
+    // 1. Dùng cho Scheduler hàng tháng
     @Transactional
     public void generateMonthlyInvoices() {
-        log.info("Starting automated monthly invoice generation for active contracts...");
-        
+        log.info("Starting automated monthly invoice generation...");
         List<Contract> activeContracts = contractRepository.findByActiveTrueAndStatus(ContractStatus.ACTIVE);
-        
         for (Contract contract : activeContracts) {
-            try {
-                // Check if invoice already exists for this contract in this month to prevent duplicates
-                // (Simplified logic: assuming one invoice per month)
-                
-                BigDecimal roomServiceFees = contract.getRoom().getServices().stream()
-                        .map(RentalService::getPrice)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                Invoice invoice = Invoice.builder()
-                        .contract(contract)
-                        .rentalAmount(contract.getRentPrice())
-                        .electricityStart(0.0) 
-                        .electricityEnd(0.0)
-                        .electricityPrice(BigDecimal.valueOf(3500))
-                        .waterStart(0.0) 
-                        .waterEnd(0.0)
-                        .waterPrice(BigDecimal.valueOf(15000))
-                        .serviceAmount(roomServiceFees)
-                        .totalAmount(contract.getRentPrice().add(roomServiceFees)) 
-                        .billingDate(LocalDateTime.now())
-                        .status(InvoiceStatus.UNPAID)
-                        .notes("Hóa đơn tự động tháng " + LocalDateTime.now().getMonthValue())
-                        .build();
-                
-                invoiceRepository.save(invoice);
-                log.info("Generated invoice for Contract ID: {} - Room: {}", contract.getId(), contract.getRoom().getRoomNumber());
-            } catch (Exception e) {
-                log.error("Failed to generate invoice for Contract ID: {}. Error: {}", contract.getId(), e.getMessage());
-            }
+            generateInvoiceForContract(contract);
         }
+    }
+
+    // 2. Dùng cho việc tạo hóa đơn ngay khi ký hợp đồng
+    @Transactional
+    public void generateInvoiceForContract(Contract contract) {
+        log.info("Generating invoice for Contract ID: {}", contract.getId());
+
+        BigDecimal roomServiceFees = contract.getRoom().getServices().stream()
+                .map(RentalService::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Invoice invoice = Invoice.builder()
+                .contract(contract)
+                .rentalAmount(contract.getRentPrice())
+                .electricityStart(0.0) 
+                .electricityEnd(0.0)
+                .electricityPrice(BigDecimal.valueOf(3500))
+                .waterStart(0.0) 
+                .waterEnd(0.0)
+                .waterPrice(BigDecimal.valueOf(15000))
+                .serviceAmount(roomServiceFees)
+                .totalAmount(contract.getRentPrice().add(roomServiceFees)) 
+                .billingDate(LocalDateTime.now())
+                .status(InvoiceStatus.UNPAID)
+                .notes("Hóa đơn tháng " + LocalDateTime.now().getMonthValue())
+                .build();
+        
+        invoiceRepository.save(invoice);
     }
 }

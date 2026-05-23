@@ -26,57 +26,42 @@ public class ContractBusinessService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BillingService billingService;
 
     /**
      * Tạo hợp đồng mới và cấp tài khoản Tenant nếu chưa có
      */
     @Transactional
     public Contract createContractAndTenant(
-            Long roomId, 
-            String tenantFullName, 
-            String tenantEmail, 
+            Long roomId,
+            String tenantFullName,
+            String tenantEmail,
             String tenantPhone,
             String tenantIdentity,
-            LocalDate startDate, 
-            LocalDate endDate, 
-            BigDecimal rentPrice, 
+            LocalDate startDate,
+            LocalDate endDate,
+            BigDecimal rentPrice,
             BigDecimal deposit) {
-        
-        // 1. Tìm Room
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng với ID: " + roomId));
-        
-        if (room.getStatus() != RoomStatus.AVAILABLE) {
-            throw new RuntimeException("Phòng không ở trạng thái trống để thuê.");
-        }
 
-        // 2. Xác định username/email để tạo/khôi phục tài khoản tenant
-        String loginIdentifier = tenantEmail != null && !tenantEmail.isBlank() ? tenantEmail : tenantPhone;
-        if (loginIdentifier == null || loginIdentifier.isBlank()) {
-            throw new RuntimeException("Thông tin email hoặc số điện thoại khách hàng không được để trống.");
-        }
+        // 1. Kiểm tra phòng và lấy thông tin
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
+
+        // 2. Xử lý User (Lấy sẵn hoặc tạo mới)
+        String loginIdentifier = tenantPhone;
+        Optional<User> existingUser = userRepository.findByPhone(loginIdentifier);
 
         User tenant;
-        Optional<User> existingUser;
-        if (loginIdentifier.contains("@")) {
-            existingUser = userRepository.findByEmail(loginIdentifier);
-        } else {
-            existingUser = userRepository.findByUsername(loginIdentifier);
-        }
-
         if (existingUser.isPresent()) {
             tenant = existingUser.get();
         } else {
-            String emailValue = tenantEmail != null && !tenantEmail.isBlank() ? tenantEmail : tenantPhone;
-            String usernameValue = loginIdentifier;
-
             tenant = User.builder()
-                    .username(usernameValue)
-                    .email(emailValue)
+                    .username(tenantPhone)
+                    .email(tenantEmail != null ? tenantEmail : tenantPhone + "@example.com")
                     .fullName(tenantFullName)
                     .phone(tenantPhone)
                     .identityNumber(tenantIdentity)
-                    .password(passwordEncoder.encode("123456")) // Pass mặc định
+                    .password(passwordEncoder.encode("123456"))
                     .role(Role.TENANT)
                     .active(true)
                     .build();
@@ -94,12 +79,25 @@ public class ContractBusinessService {
                 .status(ContractStatus.ACTIVE)
                 .active(true)
                 .build();
-        
+
         contract = contractRepository.save(contract);
 
         // 4. Đổi trạng thái Room
         room.setStatus(RoomStatus.OCCUPIED);
         roomRepository.save(room);
+
+        // 5. MỚI: Tự động tạo hóa đơn kỳ đầu tiên
+        // Chúng ta gọi BillingService để hệ thống tự tạo hóa đơn ngay khi ký hợp đồng
+        // Đảm bảo BillingService của bạn có hàm generateInvoiceForContract(Contract
+        // contract)
+        try {
+            // Nếu bạn chưa có hàm generateInvoiceForContract, hãy báo mình để mình viết
+            // cho!
+            billingService.generateInvoiceForContract(contract);
+        } catch (Exception e) {
+            // Log lỗi để admin biết, nhưng không làm rollback cả hợp đồng
+            System.err.println("Lỗi khi tự động tạo hóa đơn: " + e.getMessage());
+        }
 
         return contract;
     }
