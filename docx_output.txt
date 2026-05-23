@@ -1,0 +1,249 @@
+--- ChucNang_LuongNghiepVu_QuanLyPhongTro.docx ---
+MÔ TẢ CHỨC NĂNG – WEBSITE QUẢN LÝ PHÒNG TRỌ
+Sinh viên: Trương Quốc Đạt – MSSV: 2123110209 – Lớp: CCQ2311F
+Hệ thống có 3 loại người dùng:
+1. Khách vãng lai (Guest) – người chưa có tài khoản, vào website tìm phòng.
+2. Chủ trọ (Admin) – người quản lý toàn bộ khu trọ.
+3. Người thuê phòng (Tenant) – người đã thuê phòng, được cấp tài khoản.
+CHỨC NĂNG CỦA KHÁCH VÃNG LAI (GUEST)
+1. Xem trang chủ
+Mục đích: Cho khách thấy thông tin tổng quan về khu trọ khi mới vào website.
+Quy trình:
+- Khách vào website → thấy trang chủ có banner, hình ảnh khu trọ, phòng nổi bật, thông tin liên hệ.
+2. Xem danh sách phòng
+Mục đích: Cho khách biết có những phòng nào đang trống, giá bao nhiêu.
+Quy trình:
+- Khách bấm "Danh sách phòng" → hệ thống hiện ra tất cả phòng đang trống kèm ảnh, giá, diện tích.
+3. Tìm kiếm và lọc phòng
+Mục đích: Giúp khách tìm nhanh phòng theo ý muốn thay vì phải xem hết.
+Quy trình:
+- Khách chọn tiêu chí (giá, diện tích, tầng) → hệ thống lọc và chỉ hiện phòng phù hợp.
+4. Xem chi tiết phòng
+Mục đích: Cho khách xem đầy đủ thông tin 1 phòng trước khi quyết định thuê.
+Quy trình:
+- Khách bấm vào phòng → hệ thống hiện ảnh lớn, mô tả tiện nghi, giá, diện tích.
+5. Đăng ký thuê phòng
+Mục đích: Cho khách gửi yêu cầu thuê phòng trực tuyến thay vì phải đến tận nơi.
+Quy trình:
+- Khách bấm "Đăng ký thuê" → điền họ tên, SĐT, CCCD, ngày muốn vào → bấm "Gửi".
+- Hệ thống lưu lại và báo cho Admin.
+6. Liên hệ chủ trọ
+Mục đích: Cho khách hỏi thêm thông tin trước khi thuê.
+Quy trình:
+- Khách bấm "Liên hệ" → điền tên, SĐT, nội dung câu hỏi → bấm "Gửi".
+CHỨC NĂNG CỦA CHỦ TRỌ (ADMIN)
+1. Đăng nhập / Đăng xuất
+Mục đích: Bảo mật, chỉ Admin mới vào được trang quản lý.
+Quy trình:
+- Admin nhập email + mật khẩu → đúng thì vào Dashboard, sai thì báo lỗi.
+- Muốn thoát thì bấm "Đăng xuất".
+2. Dashboard tổng quan
+Mục đích: Cho Admin thấy nhanh tình hình khu trọ khi vừa đăng nhập.
+Quy trình:
+- Đăng nhập xong → hệ thống hiện Dashboard: bao nhiêu phòng trống, phòng đã thuê, doanh thu tháng này, hợp đồng sắp hết hạn.
+3. Quản lý phòng trọ
+Mục đích: Thêm, sửa, xóa phòng và cập nhật trạng thái phòng.
+Quy trình:
+- Admin vào trang quản lý phòng → thấy danh sách phòng.
+- Muốn thêm: bấm "Thêm phòng" → nhập tên, giá, diện tích, ảnh → "Lưu".
+- Muốn sửa: chọn phòng → sửa thông tin → "Cập nhật".
+- Muốn xóa: chọn phòng → "Xóa" → xác nhận.
+4. Phê duyệt yêu cầu đặt phòng
+Mục đích: Xem và duyệt các yêu cầu thuê phòng từ khách gửi lên.
+Quy trình:
+- Admin vào trang duyệt → thấy danh sách yêu cầu.
+- Xem hồ sơ khách → bấm "Chấp nhận" hoặc "Từ chối".
+5. Quản lý người thuê
+Mục đích: Lưu thông tin người thuê và cấp tài khoản đăng nhập cho họ.
+Quy trình:
+- Admin vào trang quản lý người thuê → xem danh sách.
+- Thêm/sửa/xóa thông tin người thuê.
+- Cấp tài khoản (email + mật khẩu) cho người thuê mới.
+6. Quản lý hợp đồng
+Mục đích: Tạo hợp đồng thuê, theo dõi thời hạn, gia hạn hoặc thanh lý khi cần.
+Quy trình:
+- Admin tạo hợp đồng: chọn người thuê, chọn phòng, nhập ngày bắt đầu/kết thúc, giá thuê → "Tạo".
+- Phòng tự động chuyển sang "Đã thuê".
+- Gia hạn: chọn hợp đồng → cập nhật ngày kết thúc mới.
+- Thanh lý: chọn hợp đồng → kiểm tra nợ → trả phòng → phòng về "Trống".
+7. Quản lý hóa đơn
+Mục đích: Tính tiền điện nước hàng tháng tự động, không cần tính tay.
+Quy trình:
+- Đầu tháng, Admin tạo hóa đơn mới.
+- Nhập chỉ số điện (đầu kỳ, cuối kỳ) và nước cho từng phòng.
+- Hệ thống tự tính: tiền điện + nước + phòng + dịch vụ = tổng.
+- Admin xuất hóa đơn → hệ thống báo cho người thuê.
+- Người thuê trả tiền xong → Admin cập nhật "Đã thanh toán".
+8. Quản lý dịch vụ phụ
+Mục đích: Thêm bớt các dịch vụ (internet, giữ xe, vệ sinh) và cập nhật giá.
+Quy trình:
+- Admin vào trang dịch vụ → xem danh sách.
+- Thêm: nhập tên dịch vụ + giá → "Thêm".
+- Sửa/Xóa: chọn dịch vụ → chỉnh sửa hoặc xóa.
+9. Thống kê và báo cáo
+Mục đích: Xem doanh thu, tỷ lệ phòng trống, phòng nợ tiền.
+Quy trình:
+- Admin vào trang thống kê → xem biểu đồ doanh thu theo tháng, tỷ lệ phòng trống/đã thuê, danh sách phòng còn nợ.
+10. Xử lý yêu cầu bảo trì
+Mục đích: Xem và xử lý các sự cố người thuê báo lên.
+Quy trình:
+- Admin nhận thông báo có yêu cầu mới → xem nội dung + ảnh.
+- Phản hồi và cập nhật trạng thái: "Đang chờ" → "Đang xử lý" → "Đã xong".
+11. Gửi thông báo
+Mục đích: Gửi thông báo chung đến tất cả người thuê (lịch thu tiền, cúp điện...).
+Quy trình:
+- Admin bấm "Tạo thông báo" → nhập tiêu đề + nội dung → "Gửi".
+- Tất cả người thuê sẽ thấy thông báo khi đăng nhập.
+CHỨC NĂNG CỦA NGƯỜI THUÊ PHÒNG (TENANT)
+1. Đăng nhập / Đăng xuất
+Mục đích: Bảo mật, chỉ người thuê mới xem được thông tin của mình.
+Quy trình:
+- Nhập email + mật khẩu do Admin cấp → đúng thì vào, sai thì báo lỗi.
+2. Xem trang cá nhân
+Mục đích: Xem lại thông tin cá nhân và phòng đang ở.
+Quy trình:
+- Đăng nhập → hệ thống hiện trang cá nhân: họ tên, SĐT, CCCD, số phòng, ngày vào ở.
+3. Xem hợp đồng
+Mục đích: Xem lại hợp đồng thuê bất kỳ lúc nào.
+Quy trình:
+- Bấm "Hợp đồng" → xem thời hạn, giá thuê, điều khoản.
+4. Xem hóa đơn hàng tháng
+Mục đích: Biết mình phải trả bao nhiêu tiền mỗi tháng.
+Quy trình:
+- Bấm "Hóa đơn" → xem danh sách hóa đơn + trạng thái đã trả/chưa trả.
+- Bấm vào hóa đơn cụ thể → xem chi tiết: chỉ số điện nước, đơn giá, tổng tiền.
+5. Gửi yêu cầu bảo trì
+Mục đích: Báo hư hỏng cho chủ trọ biết để sửa.
+Quy trình:
+- Bấm "Yêu cầu bảo trì" → chọn loại sự cố, mô tả, đính kèm ảnh → "Gửi".
+- Theo dõi trạng thái: "Đang chờ" → "Đang sửa" → "Đã xong".
+6. Xem thông báo
+Mục đích: Xem các thông báo từ chủ trọ.
+Quy trình:
+- Bấm "Thông báo" → xem danh sách thông báo từ Admin.
+7. Đổi mật khẩu
+Mục đích: Đổi mật khẩu mặc định do Admin cấp sang mật khẩu riêng.
+Quy trình:
+- Bấm "Đổi mật khẩu" → nhập mật khẩu cũ, mật khẩu mới → "Lưu".
+CÁC QUY TRÌNH CHÍNH CỦA HỆ THỐNG
+1. Quy trình đặt phòng
+Mục đích: Khách tìm phòng trên web → đăng ký → Admin duyệt → tạo hợp đồng.
+Quy trình:
+- Khách vào web → xem phòng → chọn phòng → bấm "Đăng ký thuê" → điền thông tin → gửi.
+- Admin nhận yêu cầu → xem hồ sơ → chấp nhận hoặc từ chối.
+- Nếu chấp nhận → tạo hợp đồng → phòng chuyển "Đã thuê" → cấp tài khoản cho người thuê.
+2. Quy trình tính hóa đơn hàng tháng
+Mục đích: Tính tiền điện nước tự động cho từng phòng mỗi tháng.
+Quy trình:
+- Đầu tháng Admin nhập chỉ số điện nước → hệ thống tự tính tiền → xuất hóa đơn.
+- Người thuê đăng nhập xem hóa đơn → trả tiền → Admin cập nhật "Đã thanh toán".
+3. Quy trình bảo trì
+Mục đích: Người thuê báo hư hỏng → Admin tiếp nhận và sửa chữa.
+Quy trình:
+- Người thuê tạo yêu cầu (mô tả + ảnh) → Admin nhận → phản hồi → sửa xong → cập nhật "Đã xong".
+4. Quy trình gia hạn / thanh lý hợp đồng
+Mục đích: Xử lý khi hợp đồng sắp hết hạn.
+Quy trình:
+- Dashboard báo hợp đồng sắp hết hạn → Admin liên hệ người thuê.
+- Nếu gia hạn: cập nhật ngày kết thúc mới.
+- Nếu thanh lý: kiểm tra nợ → trả phòng → phòng về "Trống" → vô hiệu hóa tài khoản.
+
+--- decuong_web_quanly_phongtro_hoan_thien.docx ---
+BỘ CÔNG THƯƠNG
+TRƯỜNG CAO ĐẲNG CÔNG THƯƠNG TP.HCM
+KHOA CÔNG NGHỆ THÔNG TIN
+ĐỀ CƯƠNG KHÓA LUẬN TỐT NGHIỆP
+XÂY DỰNG WEBSITE QUẢN LÝ PHÒNG TRỌ
+Sinh viên thực hiện:
+1. Trương Quốc ĐạtMSSV: 2123110209Lớp: CCQ2311F
+Giảng viên hướng dẫn: ThS. Nguyễn Xuân Nhựt 
+TP. Hồ Chí Minh – Tháng 03/2026
+PHẦN I. MỞ ĐẦU
+Giới thiệu về đồ án
+Trong bối cảnh nhu cầu thuê phòng trọ ngày càng tăng, việc quản lý phòng trọ bằng phương pháp thủ công gây nhiều khó khăn cho chủ trọ như khó theo dõi thông tin người thuê, hợp đồng, tình trạng phòng và thanh toán. Vì vậy việc xây dựng một website quản lý phòng trọ giúp số hóa quá trình quản lý, giúp theo dõi thông tin dễ dàng, chính xác và tiết kiệm thời gian.
+Mục đích chọn đồ án
+Mong muốn áp dụng kiến thức đã học về lập trình web và phát triển phần mềm để xây dựng một hệ thống quản lý thực tế phục vụ cho việc quản lý phòng trọ.
+Đối tượng và phạm vi nghiên cứu
+Đối tượng nghiên cứu
+Đối tượng nghiên cứu chính là kiến trúc hệ thống web đa tầng, cơ sở dữ liệu MySQL, giao diện người dùng bằng ReactJS, logic nghiệp vụ quản lý phòng trọ và bảo mật thông tin. 
+Phạm vi nghiên cứu
+Hệ thống quản lý phòng trọ
+Phương pháp nghiên cứu
+Các phương pháp nghiên cứu phổ biến hiện nay gồm có tài liệu chính thức của Spring Boot / React và hướng dẫn trực tuyến, khóa học trực tuyến và các nguồn học trên mạng, cộng đồng và diễn đàn trực tuyến, tài liệu sách in và tài liệu tham khảo, dự án mã nguồn mở và mẫu dự án, Video hướng dẫn trên YouTube…
+Các phương pháp áp dụng trong đồ án gồm có đọc tài liệu từ trang chủ của Spring Boot / React và online, tham khảo và xem trên các diễn đàn, đọc sách về tài liệu liên quan, một số video hướng dẫn trên YouTube.
+Tìm hiểu và nghiên cứu cơ sở lý thuyết
+Về thực nghiệm
+Xác định yêu cầu và mục tiêu
+Xác định các chức năng chức năng của website: Quản lý khách trọ, quản lý phòng, hợp đồng và hóa đơn điện nước tự động. Điều này bao gồm việc xác định các chức năng, tính năng, hệ thống quản lý và các tính năng nghiệp vụ của website.
+Thiết kế hệ thống và kiến trúc phần mềm
+Xác định cấu trúc của hệ thống website, bao gồm thiết kế cơ sở dữ liệu, giao diện người dùng và các chức năng quản lý phòng. Xác định các mô-đun và tương tác giữa chúng để tạo ra một hệ thống web ổn định và chuyên nghiệp.
+Phát triển và triển khai
+Phân tích và kết luận
+Phân tích kết quả của quá trình phát triển, đánh giá hiệu suất và đạt được mục tiêu hay không. Rút ra kết luận về phương pháp và quá trình đã sử dụng, những hạn chế và cải thiện có thể áp dụng cho các dự án tương tự trong tương lai
+PHẦN II. NỘI DUNG
+Tổng quan
+Tổng quan về công nghệ sử dụng (Java, ReactJS, MySQL)
+Tổng quan về hệ thống quản lý phòng trọ
+Các chức năng chính của hệ thống quản lý phòng trọ
+2.1 Chức năng dành cho khách vãng lai (Public Website):
+- Xem danh mục phòng trọ hiện có (hình ảnh, giá cả, mô tả chi tiết).
+- Tìm kiếm và lọc phòng theo các tiêu chí (mức giá, diện tích, vị trí).
+- Gửi yêu cầu đăng ký thuê phòng trực tuyến qua biểu mẫu thông tin.
+2.2 Chức năng dành cho Chủ trọ (Admin Portal):
+- Quản lý phòng: Thêm, sửa, xóa và cập nhật trạng thái phòng (trống/đã thuê).
+- Tiếp nhận yêu cầu: Xem xét và phê duyệt các hồ sơ đăng ký thuê phòng trực tuyến.
+- Quản lý người thuê & Hợp đồng: Lưu trữ hồ sơ thuê và tạo/gia hạn hợp đồng điện tử.
+- Quản lý hóa đơn: Tự động tính toán hóa đơn dịch vụ (điện, nước, vệ sinh) hàng tháng.
+- Thống kê: Dashboard báo cáo doanh thu, tỷ lệ phòng trống và các chỉ số kinh doanh.
+2.3 Chức năng dành cho Người thuê phòng (Tenant Portal):
+- Đăng nhập xem thông tin tài khoản, phòng ở và chi tiết hợp đồng thuê.
+- Theo dõi hóa đơn: Xem lịch sử các hóa đơn điện nước và trạng thái thanh toán.
+- Báo cáo sự cố: Gửi yêu cầu sửa chữa cơ sở vật chất trực tiếp cho chủ trọ.
+PHẦN V. DANH MỤC TÀI LIỆU THAM KHẢO
+1. Spring Boot Documentation - spring.io
+2. ReactJS Official Documentation - reactjs.org
+3. MySQL 8.0 Reference Manual - oracle.com
+4. Các bài giảng Fullstack Java & ReactJS.
+PHẦN III: DANH MỤC TÀI LIỆU THAM KHẢO
+Tiếng Anh 
+Vahe Karamian, Josh Long, Cloud Native Java with Spring Boot, 2020.
+Robin Wieruch, The Road to React, 2021.
+Trên Internet
+http://youtube.com 
+PHẦN IV: DỰ KIẾN KẾ HOẠCH THỰC HIỆN
+STT
+Nội dung
+Thời gian
+1
+Chương 1: Tổng quan
+1 tuần
+2
+Chương 2: Kiến trúc của phần mềm website  Hệ thống quản lý
+5 tuần
+3
+Chương 3: Kết quả thực nghiệm
+3 tuần
+4
+Chương 4: Kết luận và hướng phát triển
+2 tuần
+5
+Chỉnh sửa và hoàn thành báo cáo
+1 tuần
+Thời gian
+Nội dung thực hiện
+Kết quả dự kiến
+Tuần 1 - 2
+Khảo sát thực tế, phân tích yêu cầu và thiết kế DB
+Sơ đồ ERD và đặc tả chức năng
+Tuần 3 - 5
+Xây dựng Backend APIs (Spring Boot) và bảo mật JWT
+Các APIs quản lý (Phòng, Khách, Bill)
+Tuần 6 - 8
+Phát triển Frontend (ReactJS) và tích hợp API
+Hoàn thiện giao diện UI/UX
+Tuần 9 - 10
+Kiểm thử (Unit test/Integration test) và viết báo cáo
+Phần mềm chạy ổn định và đề cương hoàn chỉnh
+                      
+Ý KIẾN CỦA GIÁO VIÊN HƯỚNG DẪNNGƯỜI LẬP ĐỀ CƯƠNG
+DUYỆT CỦA TRƯỞNG TIỂU BAN CHẤM ĐỀ CƯƠNG
