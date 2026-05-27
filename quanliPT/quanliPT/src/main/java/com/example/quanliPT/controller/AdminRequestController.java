@@ -12,7 +12,7 @@ import com.example.quanliPT.repository.RentalRequestRepository;
 import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j; // Thêm import này
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/api/admin/requests")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-@Slf4j // Thêm annotation này
+@Slf4j
 public class AdminRequestController {
 
     private final RentalRequestRepository rentalRequestRepository;
@@ -37,7 +37,10 @@ public class AdminRequestController {
 
     @GetMapping("/rental")
     public List<RentalRequest> getAllRentalRequests() {
-        return rentalRequestRepository.findAll();
+        log.info("Entering getAllRentalRequests");
+        List<RentalRequest> result = rentalRequestRepository.findAll();
+        log.info("Returning {} rental requests", result.size());
+        return result;
     }
 
     @PutMapping("/rental/{id}/status")
@@ -45,15 +48,21 @@ public class AdminRequestController {
             @PathVariable Long id,
             @RequestParam RentalRequestStatus status
     ) {
+        log.info("Entering updateRentalRequestStatus with id={}, status={}", id, status);
         RentalRequest request = rentalRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rental request not found"));
         request.setStatus(status);
-        return ResponseEntity.ok(rentalRequestRepository.save(request));
+        RentalRequest saved = rentalRequestRepository.save(request);
+        log.info("Rental request id={} status updated to {}", id, status);
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/contacts")
     public List<ContactMessage> getAllContactMessages() {
-        return contactMessageRepository.findAll();
+        log.info("Entering getAllContactMessages");
+        List<ContactMessage> result = contactMessageRepository.findAll();
+        log.info("Returning {} contact messages", result.size());
+        return result;
     }
 
     @PostMapping("/rental/{id}/approve-and-create-contract")
@@ -64,10 +73,12 @@ public class AdminRequestController {
             @RequestParam BigDecimal rentPrice,
             @RequestParam BigDecimal deposit
     ) {
+        log.info("Entering approveAndCreateContract with id={}, startDate={}, endDate={}", id, startDate, endDate);
         RentalRequest request = rentalRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rental request not found"));
         var room = request.getRoom();
         if (room == null) {
+            log.error("Rental request id={} has no room associated", id);
             throw new RuntimeException("Rental request has no room");
         }
 
@@ -86,13 +97,14 @@ public class AdminRequestController {
         // ✅ THÊM ĐOẠN CODE NÀY - Cập nhật trạng thái phòng (Lưu ý: logic này đã có trong service, có thể cân nhắc xóa để tránh trùng lặp)
         if (room != null) {
             room.setStatus(RoomStatus.OCCUPIED);
-            log.info("AdminRequestController: Đang cập nhật trạng thái phòng ID {} thành {}", room.getId(), room.getStatus()); // Thêm log
+            log.info("AdminRequestController: Đang cập nhật trạng thái phòng ID {} thành {}", room.getId(), room.getStatus());
             roomRepository.save(room);
         }
 
         request.setStatus(RentalRequestStatus.APPROVED);
         rentalRequestRepository.save(request);
 
+        log.info("Contract created successfully with id={} for rental request id={}", savedContract.getId(), id);
         return ResponseEntity.ok(savedContract);
     }
 }

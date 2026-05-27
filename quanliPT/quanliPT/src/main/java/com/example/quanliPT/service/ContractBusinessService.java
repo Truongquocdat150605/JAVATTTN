@@ -10,7 +10,7 @@ import com.example.quanliPT.repository.ContractRepository;
 import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j; // Thêm import này
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j // Thêm annotation này
+@Slf4j
 public class ContractBusinessService {
 
     private final ContractRepository contractRepository;
@@ -42,23 +42,34 @@ public class ContractBusinessService {
             BigDecimal rentPrice,
             BigDecimal deposit) {
 
+        log.info("Starting createContractAndTenant for roomId={}, tenantPhone={}", roomId, tenantPhone);
+
         // 1. Lấy phòng
+        log.debug("Looking up room with id={}", roomId);
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
+                .orElseThrow(() -> {
+                    log.error("Room not found with id={}", roomId);
+                    return new RuntimeException("Không tìm thấy phòng");
+                });
+        log.debug("Found room: id={}, status={}", room.getId(), room.getStatus());
 
         // 2. Tìm hoặc tạo User
         String loginIdentifier = tenantPhone;
+        log.debug("Looking up user by phone={}", loginIdentifier);
         Optional<User> existingUser = userRepository.findByPhone(loginIdentifier);
 
         User tenant;
         if (existingUser.isPresent()) {
             tenant = existingUser.get();
+            log.debug("Existing user found: id={}, username={}", tenant.getId(), tenant.getUsername());
             // Cập nhật thông tin nếu cần
             if (tenantEmail != null) tenant.setEmail(tenantEmail);
             if (tenantFullName != null) tenant.setFullName(tenantFullName);
             if (tenantIdentity != null) tenant.setIdentityNumber(tenantIdentity);
             tenant = userRepository.save(tenant);
+            log.info("Updated existing tenant id={}", tenant.getId());
         } else {
+            log.debug("No existing user found, creating new tenant");
             tenant = User.builder()
                     .username(tenantPhone)
                     .email(tenantEmail != null ? tenantEmail : tenantPhone + "@example.com")
@@ -70,9 +81,11 @@ public class ContractBusinessService {
                     .active(true)
                     .build();
             tenant = userRepository.save(tenant);
+            log.info("Created new tenant id={}, username={}", tenant.getId(), tenant.getUsername());
         }
 
         // 3. Tạo hợp đồng
+        log.debug("Creating contract for roomId={}, tenantId={}", room.getId(), tenant.getId());
         Contract contract = Contract.builder()
                 .room(room)
                 .tenant(tenant)
@@ -85,19 +98,24 @@ public class ContractBusinessService {
                 .build();
 
         contract = contractRepository.save(contract);
+        log.info("Contract created with id={}, status=ACTIVE", contract.getId());
 
         // 4. Đổi trạng thái phòng
+        log.debug("Updating room status to OCCUPIED for roomId={}", room.getId());
         room.setStatus(RoomStatus.OCCUPIED);
-        log.info("ContractBusinessService: Đang cập nhật trạng thái phòng ID {} thành {}", room.getId(), room.getStatus()); // Thêm log
+        log.info("Room id={} status changed to {}", room.getId(), room.getStatus());
         roomRepository.save(room);
 
         // 5. Tự động tạo hóa đơn kỳ đầu
+        log.debug("Generating initial invoice for contract id={}", contract.getId());
         try {
             billingService.generateInvoiceForContract(contract);
+            log.info("Initial invoice generated for contract id={}", contract.getId());
         } catch (Exception e) {
-            System.err.println("Lỗi khi tự động tạo hóa đơn: " + e.getMessage());
+            log.error("Failed to generate initial invoice for contract id={}: {}", contract.getId(), e.getMessage(), e);
         }
 
+        log.info("Completed createContractAndTenant successfully for contractId={}", contract.getId());
         return contract;
     }
 }

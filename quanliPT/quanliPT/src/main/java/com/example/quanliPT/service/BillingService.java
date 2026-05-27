@@ -20,41 +20,50 @@ public class BillingService {
     private final ContractRepository contractRepository;
     private final InvoiceRepository invoiceRepository;
 
-    // 1. Dùng cho Scheduler hàng tháng
     @Transactional
     public void generateMonthlyInvoices() {
         log.info("Starting automated monthly invoice generation...");
         List<Contract> activeContracts = contractRepository.findByActiveTrueAndStatus(ContractStatus.ACTIVE);
+        log.debug("Found {} active contracts for monthly invoicing", activeContracts.size());
         for (Contract contract : activeContracts) {
-            generateInvoiceForContract(contract);
+            try {
+                generateInvoiceForContract(contract);
+            } catch (Exception e) {
+                log.error("Failed to generate monthly invoice for contract id={}: {}", contract.getId(), e.getMessage(), e);
+            }
         }
+        log.info("Monthly invoice generation completed");
     }
 
-    // 2. Dùng cho việc tạo hóa đơn ngay khi ký hợp đồng
     @Transactional
     public void generateInvoiceForContract(Contract contract) {
         log.info("Generating invoice for Contract ID: {}", contract.getId());
+        log.debug("Contract details: rentPrice={}, servicesCount={}",
+                contract.getRentPrice(),
+                contract.getRoom().getServices() != null ? contract.getRoom().getServices().size() : 0);
 
         BigDecimal roomServiceFees = contract.getRoom().getServices().stream()
                 .map(RentalService::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        log.debug("Total service fees calculated: {}", roomServiceFees);
 
         Invoice invoice = Invoice.builder()
                 .contract(contract)
                 .rentalAmount(contract.getRentPrice())
-                .electricityStart(0.0) 
+                .electricityStart(0.0)
                 .electricityEnd(0.0)
                 .electricityPrice(BigDecimal.valueOf(3500))
-                .waterStart(0.0) 
+                .waterStart(0.0)
                 .waterEnd(0.0)
                 .waterPrice(BigDecimal.valueOf(15000))
                 .serviceAmount(roomServiceFees)
-                .totalAmount(contract.getRentPrice().add(roomServiceFees)) 
+                .totalAmount(contract.getRentPrice().add(roomServiceFees))
                 .billingDate(LocalDateTime.now())
                 .status(InvoiceStatus.UNPAID)
                 .notes("Hóa đơn tháng " + LocalDateTime.now().getMonthValue())
                 .build();
-        
+
         invoiceRepository.save(invoice);
+        log.info("Invoice saved for contract id={} with totalAmount={}", contract.getId(), invoice.getTotalAmount());
     }
 }

@@ -8,7 +8,7 @@ import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import com.example.quanliPT.service.ContractBusinessService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j; // Thêm import này
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contracts")
 @RequiredArgsConstructor
-@Slf4j // Thêm annotation này
+@Slf4j
 public class ContractController {
 
     private final ContractRepository contractRepository;
@@ -29,40 +29,50 @@ public class ContractController {
     private final RoomRepository roomRepository;
     private final ContractBusinessService contractBusinessService;
 
-    // ========== API HIỆN CÓ ==========
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<Contract> getAllContracts() {
-        return contractRepository.findAll();
+        log.info("Entering getAllContracts");
+        List<Contract> result = contractRepository.findAll();
+        log.info("Returning {} contracts", result.size());
+        return result;
     }
 
     @GetMapping("/my-contracts/{tenantId}")
     @PreAuthorize("@contractSecurity.canAccessTenantContracts(#tenantId, authentication)")
     public List<Contract> getMyContracts(@PathVariable Long tenantId) {
-        return contractRepository.findByTenantId(tenantId);
+        log.info("Entering getMyContracts for tenantId={}", tenantId);
+        List<Contract> result = contractRepository.findByTenantId(tenantId);
+        log.info("Returning {} contracts for tenantId={}", result.size(), tenantId);
+        return result;
     }
 
     @GetMapping("/my")
     @PreAuthorize("hasRole('TENANT')")
     public List<Contract> getCurrentTenantContracts(Authentication authentication) {
+        log.info("Entering getCurrentTenantContracts for user={}", authentication.getName());
         var user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return contractRepository.findByTenantId(user.getId());
+        List<Contract> result = contractRepository.findByTenantId(user.getId());
+        log.info("Returning {} contracts for current user", result.size());
+        return result;
     }
 
-    // ========== API HIỆN CÓ (Chỉ nhận Contract object, KHÔNG tạo tenant) ==========
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Contract> createContract(@RequestBody Contract contract) {
+        log.info("Entering createContract with roomId={}, tenantId={}",
+                contract.getRoom() != null ? contract.getRoom().getId() : null,
+                contract.getTenant() != null ? contract.getTenant().getId() : null);
         Contract saved = contractRepository.save(contract);
         if (saved.getRoom() != null) {
             saved.getRoom().setStatus(RoomStatus.OCCUPIED);
-            log.info("ContractController: createContract: Đang cập nhật trạng thái phòng ID {} thành {}", saved.getRoom().getId(), saved.getRoom().getStatus()); // Thêm log
+            log.info("ContractController: createContract: Cập nhật trạng thái phòng ID {} thành {}", saved.getRoom().getId(), saved.getRoom().getStatus());
             roomRepository.save(saved.getRoom());
         }
+        log.info("Contract created id={}", saved.getId());
         return ResponseEntity.ok(saved);
     }
 
-    // ========== API MỚI: Tạo hợp đồng + Tự động tạo Tenant nếu chưa có ==========
     @PostMapping("/create-with-tenant")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Contract> createContractWithTenant(
@@ -76,6 +86,7 @@ public class ContractController {
             @RequestParam BigDecimal rentPrice,
             @RequestParam BigDecimal deposit) {
 
+        log.info("Entering createContractWithTenant roomId={}, tenantPhone={}, startDate={}", roomId, tenantPhone, startDate);
         Contract contract = contractBusinessService.createContractAndTenant(
                 roomId,
                 tenantFullName,
@@ -87,14 +98,18 @@ public class ContractController {
                 rentPrice,
                 deposit
         );
+        log.info("Contract created with id={} via createContractWithTenant", contract.getId());
         return ResponseEntity.ok(contract);
     }
 
-    // ========== API HIỆN CÓ ==========
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody Contract contractDetails) {
-        Contract contract = contractRepository.findById(id).orElseThrow();
+        log.info("Entering updateContract for contract id={}", id);
+        Contract contract = contractRepository.findById(id).orElseThrow(() -> {
+            log.error("Contract not found with id={}", id);
+            return new RuntimeException("Contract not found");
+        });
         contract.setStartDate(contractDetails.getStartDate());
         contract.setEndDate(contractDetails.getEndDate());
         contract.setRentPrice(contractDetails.getRentPrice());
@@ -102,32 +117,38 @@ public class ContractController {
         contract.setStatus(contractDetails.getStatus());
         contract.setActive(contractDetails.isActive());
         Contract saved = contractRepository.save(contract);
+        log.debug("Contract id={} saved with status={}, active={}", saved.getId(), saved.getStatus(), saved.isActive());
 
         if (saved.getRoom() != null) {
             boolean shouldFreeRoom = !saved.isActive()
                     || saved.getStatus() == ContractStatus.EXPIRED
                     || saved.getStatus() == ContractStatus.TERMINATED;
             saved.getRoom().setStatus(shouldFreeRoom ? RoomStatus.AVAILABLE : RoomStatus.OCCUPIED);
-            log.info("ContractController: updateContract: Đang cập nhật trạng thái phòng ID {} thành {}", saved.getRoom().getId(), saved.getRoom().getStatus()); // Thêm log
+            log.info("ContractController: updateContract: Cập nhật trạng thái phòng ID {} thành {}", saved.getRoom().getId(), saved.getRoom().getStatus());
             roomRepository.save(saved.getRoom());
         }
 
         if (saved.getTenant() != null) {
             if (saved.getStatus() == ContractStatus.TERMINATED || !saved.isActive()) {
                 saved.getTenant().setActive(false);
+                log.debug("Tenant id={} deactivated", saved.getTenant().getId());
             } else if (saved.getStatus() == ContractStatus.ACTIVE && saved.isActive()) {
                 saved.getTenant().setActive(true);
+                log.debug("Tenant id={} activated", saved.getTenant().getId());
             }
             userRepository.save(saved.getTenant());
         }
 
+        log.info("Contract id={} updated successfully", saved.getId());
         return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
+        log.info("Entering deleteContract for contract id={}", id);
         contractRepository.deleteById(id);
+        log.info("Contract id={} deleted", id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -8,6 +8,7 @@ import com.example.quanliPT.model.User;
 import com.example.quanliPT.repository.UserRepository;
 import com.example.quanliPT.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -23,7 +25,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
+        log.info("Registering new user with username={}", request.getUsername());
         if (userRepository.existsByUsername(request.getUsername())) {
+            log.warn("Registration failed: username {} already exists", request.getUsername());
             throw new RuntimeException("Username already exists");
         }
 
@@ -38,6 +42,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        log.debug("User saved with id={}, username={}", user.getId(), user.getUsername());
 
         var springUser = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
@@ -46,6 +51,7 @@ public class AuthService {
                 .build();
 
         var token = jwtUtils.generateToken(springUser);
+        log.info("User registered successfully, token generated for username={}", user.getUsername());
 
         return AuthResponse.builder()
                 .token(token)
@@ -56,15 +62,20 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        log.info("Login attempt for username={}", request.getUsername());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
+        log.debug("Authentication successful for username={}", request.getUsername());
 
         var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow();
+                .orElseThrow(() -> {
+                    log.error("User not found after authentication: {}", request.getUsername());
+                    return new RuntimeException("User not found");
+                });
 
         var springUser = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
@@ -73,6 +84,7 @@ public class AuthService {
                 .build();
 
         var token = jwtUtils.generateToken(springUser);
+        log.info("Login successful for username={}, token generated", user.getUsername());
 
         return AuthResponse.builder()
                 .token(token)

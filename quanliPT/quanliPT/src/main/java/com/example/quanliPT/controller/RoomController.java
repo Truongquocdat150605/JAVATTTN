@@ -6,6 +6,7 @@ import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.ContractRepository;
 import com.example.quanliPT.model.Contract;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/rooms")
 @RequiredArgsConstructor
+@Slf4j
 public class RoomController {
 
     private final RoomRepository roomRepository;
@@ -32,26 +34,36 @@ public class RoomController {
 
     private final String UPLOAD_DIR = "uploads/";
 
-    // ─── GET: Lấy tất cả phòng ────────────────────────────────────────────────
     @GetMapping
     public List<Room> getAllRooms() {
-        return roomRepository.findAll();
+        log.info("Entering getAllRooms");
+        List<Room> rooms = roomRepository.findAll();
+        log.info("Returning {} rooms", rooms.size());
+        return rooms;
     }
 
-    // ─── GET: Lấy phòng còn trống ─────────────────────────────────────────────
     @GetMapping("/available")
     public List<Room> getAvailableRooms() {
-        return roomRepository.findByStatus(RoomStatus.AVAILABLE);
+        log.info("Entering getAvailableRooms");
+        List<Room> rooms = roomRepository.findByStatus(RoomStatus.AVAILABLE);
+        log.info("Returning {} available rooms", rooms.size());
+        return rooms;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
+        log.info("Entering getRoomById with id={}", id);
         return roomRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(room -> {
+                    log.debug("Found room id={}", room.getId());
+                    return ResponseEntity.ok(room);
+                })
+                .orElseGet(() -> {
+                    log.warn("Room not found with id={}", id);
+                    return ResponseEntity.notFound().build();
+                });
     }
 
-    // ─── POST: Tạo phòng với ảnh (Multipart) ─────────────────────────────────
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createRoom(
@@ -62,21 +74,20 @@ public class RoomController {
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "image", required = false) MultipartFile imageFile
     ) {
-        System.out.println("🚀 [RoomController] Request received for room: " + roomNumber);
-        
+        log.info("Entering createRoom with roomNumber={}, type={}", roomNumber, type);
         try {
-            // Validate inputs manually
             if (roomNumber == null || roomNumber.isEmpty()) {
+                log.warn("roomNumber is empty");
                 return ResponseEntity.badRequest().body(Map.of("error", "Số phòng không được để trống"));
             }
-            
+
             java.math.BigDecimal price = java.math.BigDecimal.ZERO;
             try {
                 if (priceStr != null && !priceStr.isEmpty()) {
                     price = new java.math.BigDecimal(priceStr);
                 }
             } catch (Exception e) {
-                System.err.println("Invalid price: " + priceStr);
+                log.warn("Invalid price value: {}", priceStr);
             }
 
             double area = 0;
@@ -85,7 +96,7 @@ public class RoomController {
                     area = Double.parseDouble(areaStr);
                 }
             } catch (Exception e) {
-                System.err.println("Invalid area: " + areaStr);
+                log.warn("Invalid area value: {}", areaStr);
             }
 
             String imageName = null;
@@ -93,7 +104,7 @@ public class RoomController {
                 try {
                     imageName = saveImage(imageFile);
                 } catch (Exception e) {
-                    System.err.println("Image save error: " + e.getMessage());
+                    log.error("Failed to save image: {}", e.getMessage(), e);
                 }
             }
 
@@ -108,16 +119,15 @@ public class RoomController {
                     .build();
 
             Room savedRoom = roomRepository.save(room);
-            System.out.println("✅ [RoomController] Successfully created room: " + savedRoom.getRoomNumber());
+            log.info("Room created successfully id={}, roomNumber={}", savedRoom.getId(), savedRoom.getRoomNumber());
             return ResponseEntity.ok(savedRoom);
         } catch (Exception e) {
-            System.err.println("❌ [RoomController] Critical Error: " + e.getMessage());
+            log.error("Error creating room: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Lỗi hệ thống: " + e.getMessage()));
         }
     }
 
-    // ─── PUT: Cập nhật phòng (Multipart) ─────────────────────────────────────
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateRoom(
@@ -130,10 +140,13 @@ public class RoomController {
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "image", required = false) MultipartFile imageFile
     ) {
-        System.out.println("🚀 [RoomController] Updating room ID: " + id);
+        log.info("Entering updateRoom with id={}, roomNumber={}", id, roomNumber);
         try {
-            Room room = roomRepository.findById(id).orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
-            
+            Room room = roomRepository.findById(id).orElseThrow(() -> {
+                log.error("Room not found with id={}", id);
+                return new RuntimeException("Phòng không tồn tại");
+            });
+
             if (priceStr != null && !priceStr.isEmpty()) {
                 room.setPrice(new java.math.BigDecimal(priceStr));
             }
@@ -144,39 +157,47 @@ public class RoomController {
             room.setRoomNumber(roomNumber);
             room.setType(type);
             room.setDescription(description);
-            
+
             if (status != null && !status.isEmpty()) {
                 try {
                     room.setStatus(RoomStatus.valueOf(status.toUpperCase()));
+                    log.debug("Room status set to {}", status.toUpperCase());
                 } catch (IllegalArgumentException e) {
-                    System.err.println("Invalid status: " + status);
+                    log.warn("Invalid status value: {}, keeping existing status", status);
                 }
             }
 
             if (imageFile != null && !imageFile.isEmpty()) {
-                String imageName = saveImage(imageFile);
-                room.setImage(imageName);
+                try {
+                    String imageName = saveImage(imageFile);
+                    room.setImage(imageName);
+                } catch (Exception e) {
+                    log.error("Failed to save image for room id={}: {}", id, e.getMessage(), e);
+                }
             }
 
             Room savedRoom = roomRepository.save(room);
-            System.out.println("✅ [RoomController] Updated room ID: " + savedRoom.getId());
+            log.info("Room updated successfully id={}", savedRoom.getId());
             return ResponseEntity.ok(savedRoom);
         } catch (Exception e) {
-            System.err.println("❌ [RoomController] Update error: " + e.getMessage());
+            log.error("Error updating room id={}: {}", id, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Lỗi cập nhật phòng: " + e.getMessage()));
         }
     }
 
-    // ─── PUT: Cập nhật ảnh phòng ─────────────────────────────────────────────
     @PutMapping(value = "/{id}/image")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateRoomImage(
             @PathVariable Long id,
             @RequestParam("image") MultipartFile imageFile
     ) {
+        log.info("Entering updateRoomImage for room id={}", id);
         try {
-            Room room = roomRepository.findById(id).orElseThrow();
+            Room room = roomRepository.findById(id).orElseThrow(() -> {
+                log.error("Room not found with id={}", id);
+                return new RuntimeException("Room not found");
+            });
             String imageName = saveImage(imageFile);
             room.setImage(imageName);
             roomRepository.save(room);
@@ -185,46 +206,51 @@ public class RoomController {
             response.put("fileName", imageName);
             response.put("filePath", "/uploads/" + imageName);
             response.put("message", "Cập nhật ảnh phòng thành công");
+            log.info("Image updated for room id={}: {}", id, imageName);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            log.error("Error updating image for room id={}: {}", id, e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
             error.put("error", "Lỗi cập nhật ảnh: " + e.getMessage());
             return ResponseEntity.internalServerError().body(error);
         }
     }
 
-    // 🟢 DELETE: Xóa phòng 🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteRoom(@PathVariable Long id) {
+        log.info("Entering deleteRoom with id={}", id);
         try {
-            Room room = roomRepository.findById(id).orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
-            
-            // Check if room has any active contracts
+            Room room = roomRepository.findById(id).orElseThrow(() -> {
+                log.error("Room not found with id={}", id);
+                return new RuntimeException("Phòng không tồn tại");
+            });
+
             List<Contract> activeContracts = contractRepository.findByRoomIdAndActiveTrue(id);
             if (activeContracts != null && !activeContracts.isEmpty()) {
+                log.warn("Cannot delete room id={} because it has {} active contracts", id, activeContracts.size());
                 return ResponseEntity.badRequest().body(Map.of("error", "Không thể xóa: Phòng này đang có hợp đồng hoạt động."));
             }
 
-            // Alternatively check all contracts if needed to prevent foreign key issues
-            // For now, let's assume we allow deletion if no active contract, but DB might throw FK exception if there are old invoices/contracts. 
-            // Better to handle the exception gracefully:
             roomRepository.deleteById(id);
+            log.info("Room id={} deleted", id);
             return ResponseEntity.noContent().build();
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Không thể xóa phòng này vì đã có dữ liệu hợp đồng hoặc hóa đơn liên quan. Khuyên dùng: Đổi trạng thái sang 'Bảo trì' hoặc tạo trạng thái 'Ngưng hoạt động'."));
+            log.error("Cannot delete room id={} due to data integrity violation: {}", id, e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of("error", "Không thể xóa phòng này vì đã có dữ liệu hợp đồng hoặc hóa đơn liên quan."));
         } catch (Exception e) {
+            log.error("Error deleting room id={}: {}", id, e.getMessage(), e);
             return ResponseEntity.internalServerError().body(Map.of("error", "Lỗi: " + e.getMessage()));
         }
     }
 
-    // ─── Helper: Lưu ảnh vào ./uploads/ ──────────────────────────────────────
     private String saveImage(MultipartFile imageFile) throws Exception {
+        log.debug("Saving image file: originalName={}", imageFile.getOriginalFilename());
         String contentType = imageFile.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
+            log.warn("Invalid content type: {}", contentType);
             throw new IllegalArgumentException("Chỉ chấp nhận file ảnh");
         }
-
         String originalName = StringUtils.cleanPath(
                 imageFile.getOriginalFilename() != null ? imageFile.getOriginalFilename() : "img"
         );
@@ -236,10 +262,11 @@ public class RoomController {
         Path uploadPath = Paths.get(UPLOAD_DIR).toAbsolutePath();
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
+            log.debug("Upload directory created: {}", uploadPath);
         }
 
         imageFile.transferTo(uploadPath.resolve(fileName).toFile());
-        System.out.println("✅ [Room] Ảnh đã lưu: " + fileName);
+        log.info("Image saved: {}", fileName);
         return fileName;
     }
 }
