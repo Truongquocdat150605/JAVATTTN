@@ -92,11 +92,11 @@ const Footer = () => {
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Email sx={{ fontSize: 20, color: "#0f766e" }} />
-                <Typography variant="body2">contact@smartphongtro.com</Typography>
+                <Typography variant="body2">dattruongquoc78@gmail.com</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocationOn sx={{ fontSize: 20, color: "#0f766e" }} />
-                <Typography variant="body2">123 Đường ABC, Quận 1, TP.HCM</Typography>
+                <Typography variant="body2">41 Đường số 5, Tăng Nhơn Phú B</Typography>
               </Box>
             </Stack>
           </Grid>

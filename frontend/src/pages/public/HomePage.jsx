@@ -6,9 +6,7 @@ import {
   Alert, Box, Button, Card, CardActions, CardContent, CardMedia,
   Container, Grid, MenuItem, Stack, Typography, Select,
   Paper, TextField, InputAdornment, IconButton, Skeleton,
-  Chip, Avatar, Rating, Fade, useScrollTrigger,
-  Zoom, Fab, Stepper, Step, StepLabel, Dialog,
-  DialogTitle, DialogContent, DialogActions,
+  Chip, Rating, useScrollTrigger, Zoom, Fab,
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
@@ -17,14 +15,11 @@ import {
   SquareFoot as SquareFootIcon,
   AttachMoney as AttachMoneyIcon,
   Verified as VerifiedIcon,
-  TrendingUp as TrendingUpIcon,
   Security as SecurityIcon,
   SupportAgent as SupportAgentIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
-  Star as StarIcon,
   Whatshot as WhatshotIcon,
   EmojiEmotions as EmojiEmotionsIcon,
-  FormatQuote as QuoteIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 
@@ -137,175 +132,120 @@ const RoomCard = memo(({ room, onViewDetail, index }) => (
       },
     }}
     onClick={() => onViewDetail(room.id)}
-  >
-    <Box sx={{ position: "relative", overflow: "hidden" }}>
-      <CardMedia
-        className="card-image"
-        component="img"
-        height="220"
-        image={getRoomImageUrl(room.imageFileName)}
-        alt={`Phòng ${room.roomNumber}`}
-        sx={{ transition: "transform 0.5s ease" }}
-      />
-      <Box
-        className="card-overlay"
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          bgcolor: "rgba(0,0,0,0.4)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          opacity: 0,
-          transition: "opacity 0.3s ease",
-        }}
-      >
-        <Button
-          variant="contained"
+    >
+      <Box sx={{ position: "relative", overflow: "hidden" }}>
+        <CardMedia
+          className="card-image"
+          component="img"
+          height="220"
+          image={getRoomImageUrl(room.imageFileName)}
+          alt={`Phòng ${room.roomNumber}`}
+          sx={{ transition: "transform 0.5s ease" }}
+        />
+        <Box
+          className="card-overlay"
           sx={{
-            bgcolor: "white",
-            color: "#0f766e",
-            fontWeight: 700,
-            "&:hover": { bgcolor: "#f5f5f5" },
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            bgcolor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: 0,
+            transition: "opacity 0.3s ease",
           }}
         >
-          Xem chi tiết
-        </Button>
+          <Button
+            variant="contained"
+            sx={{
+              bgcolor: "white",
+              color: "#0f766e",
+              fontWeight: 700,
+              "&:hover": { bgcolor: "#f5f5f5" },
+            }}
+          >
+            Xem chi tiết
+          </Button>
+        </Box>
+        <Chip
+          label="Còn phòng"
+          size="small"
+          sx={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            bgcolor: "#10b981",
+            color: "white",
+            fontWeight: 600,
+            fontSize: "0.7rem",
+          }}
+        />
       </Box>
-      <Chip
-        label="Còn phòng"
-        size="small"
-        sx={{
-          position: "absolute",
-          top: 12,
-          right: 12,
-          bgcolor: "#10b981",
-          color: "white",
-          fontWeight: 600,
-          fontSize: "0.7rem",
-        }}
-      />
-    </Box>
-    
-    <CardContent sx={{ p: 2.5 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-        <Typography variant="h6" sx={{ fontWeight: 900, fontSize: "1.25rem" }}>
-          Phòng {room.roomNumber}
-        </Typography>
-        <Rating value={4.5} size="small" readOnly precision={0.5} />
-      </Stack>
       
-      <Stack spacing={1.5} mt={1}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <AttachMoneyIcon sx={{ fontSize: 18, color: "#0f766e" }} />
-          <Typography variant="body1" sx={{ fontWeight: 800, color: "#0f766e" }}>
-            {formatVND(room.price)}
+      <CardContent sx={{ p: 2.5 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+          <Typography variant="h6" sx={{ fontWeight: 900, fontSize: "1.25rem" }}>
+            Phòng {room.roomNumber}
           </Typography>
-          <Typography variant="caption" color="text.secondary">/ tháng</Typography>
-        </Box>
+          <Rating value={4.5} size="small" readOnly precision={0.5} />
+        </Stack>
         
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <SquareFootIcon sx={{ fontSize: 18, color: "#94a3b8" }} />
-          <Typography variant="body2" color="text.secondary">
-            {room.area} m²
-          </Typography>
-          <Box sx={{ width: 4, height: 4, bgcolor: "#cbd5e1", borderRadius: "50%" }} />
-          <Typography variant="body2" color="text.secondary">
-            Phòng trọ
-          </Typography>
-        </Box>
-        
-        {room.address && (
+        <Stack spacing={1.5} mt={1}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <LocationOnIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {room.address}
+            <AttachMoneyIcon sx={{ fontSize: 18, color: "#0f766e" }} />
+            <Typography variant="body1" sx={{ fontWeight: 800, color: "#0f766e" }}>
+              {formatVND(room.price)}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">/ tháng</Typography>
+          </Box>
+          
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <SquareFootIcon sx={{ fontSize: 18, color: "#94a3b8" }} />
+            <Typography variant="body2" color="text.secondary">
+              {room.area} m²
+            </Typography>
+            <Box sx={{ width: 4, height: 4, bgcolor: "#cbd5e1", borderRadius: "50%" }} />
+            <Typography variant="body2" color="text.secondary">
+              Phòng trọ
             </Typography>
           </Box>
-        )}
-      </Stack>
-    </CardContent>
-    
-    <CardActions sx={{ p: 2.5, pt: 0 }}>
-      <Button
-        fullWidth
-        variant="contained"
-        component={Link}
-        to="/booking-form"
-        state={{ roomId: room.id }}
-        sx={{
-          bgcolor: "#0f766e",
-          borderRadius: "12px",
-          textTransform: "none",
-          fontWeight: 700,
-          py: 1,
-          "&:hover": { bgcolor: "#0d9488" },
-        }}
-      >
-        Thuê ngay
-      </Button>
-    </CardActions>
-  </Card>
+          
+          {room.address && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <LocationOnIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {room.address}
+              </Typography>
+            </Box>
+          )}
+        </Stack>
+      </CardContent>
+      
+      <CardActions sx={{ p: 2.5, pt: 0 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          component={Link}
+          to="/booking-form"
+          state={{ roomId: room.id }}
+          sx={{
+            bgcolor: "#0f766e",
+            borderRadius: "12px",
+            textTransform: "none",
+            fontWeight: 700,
+            py: 1,
+            "&:hover": { bgcolor: "#0d9488" },
+          }}
+        >
+          Thuê ngay
+        </Button>
+      </CardActions>
+    </Card>
   </motion.div>
 ));
-
-// Testimonial Card Component
-const TestimonialCard = ({ name, role, rating, text, avatarSrc, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay }}
-  >
-    <Paper
-      sx={{
-        p: 3,
-        borderRadius: 4,
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-        position: "relative",
-        overflow: "hidden",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: -15,
-          left: -15,
-          fontSize: 80,
-          color: "rgba(15,118,110,0.05)",
-          zIndex: 0,
-          fontFamily: "serif",
-          content: '"“"',
-        },
-      }}
-    >
-      <Box sx={{ zIndex: 1 }}>
-        <Rating value={rating} readOnly size="small" sx={{ mb: 1 }} />
-        <Typography variant="body1" color="text.secondary" sx={{ fontStyle: "italic", mb: 2 }}>
-          "{text}"
-        </Typography>
-      </Box>
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ mt: "auto", zIndex: 1 }}>
-        <Avatar src={avatarSrc} sx={{ bgcolor: "#0f766e" }}>
-          {name.charAt(0)}
-        </Avatar>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700}>
-            {name}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {role}
-          </Typography>
-        </Box>
-      </Stack>
-    </Paper>
-  </motion.div>
-);
-
 
 const HomePage = () => {
   const [rooms, setRooms] = useState([]);
@@ -314,7 +254,6 @@ const HomePage = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [minArea, setMinArea] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -361,30 +300,6 @@ const HomePage = () => {
     { icon: <VerifiedIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "Uy tín hàng đầu", desc: "Cam kết minh bạch, rõ ràng trong mọi giao dịch" },
     { icon: <SecurityIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "An toàn & Bảo mật", desc: "Thông tin cá nhân được bảo vệ tuyệt đối" },
     { icon: <SupportAgentIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "Hỗ trợ 24/7", desc: "Đội ngũ chăm sóc khách hàng nhiệt tình" },
-  ];
-
-  const testimonials = [
-    {
-      name: "Nguyễn Thị B",
-      role: "Khách thuê",
-      rating: 5,
-      text: "Tìm được phòng ưng ý với giá tốt, dịch vụ hỗ trợ rất nhiệt tình. Rất hài lòng!",
-      avatarSrc: "https://randomuser.me/api/portraits/women/1.jpg",
-    },
-    {
-      name: "Trần Văn C",
-      role: "Khách thuê",
-      rating: 4.5,
-      text: "Giao diện dễ sử dụng, thông tin phòng rõ ràng. Quá trình thuê nhanh chóng.",
-      avatarSrc: "https://randomuser.me/api/portraits/men/2.jpg",
-    },
-    {
-      name: "Lê Thị D",
-      role: "Khách thuê",
-      rating: 5,
-      text: "Hệ thống quản lý hợp đồng và hóa đơn rất tiện lợi, không cần lo lắng quên thanh toán.",
-      avatarSrc: "https://randomuser.me/api/portraits/women/3.jpg",
-    },
   ];
 
   return (
@@ -690,38 +605,6 @@ const HomePage = () => {
             )}
           </>
         )}
-
-        {/* Testimonials Section */}
-        <Box sx={{ my: 8 }}>
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 900,
-              textAlign: "center",
-              mb: 2,
-              background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            Khách Hàng Nói Gì Về Chúng Tôi?
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ textAlign: "center", mb: 6, maxWidth: 600, mx: "auto" }}
-          >
-            Những đánh giá chân thực từ cộng đồng khách thuê của Smart Phòng Trọ
-          </Typography>
-          <Grid container spacing={3}>
-            {testimonials.map((testimonial, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <TestimonialCard {...testimonial} delay={index * 0.1} />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
       </Container>
 
       {/* CTA Section */}
@@ -756,7 +639,8 @@ const HomePage = () => {
             <Button
               variant="contained"
               size="large"
-              onClick={() => setOpenDialog(true)}
+              component={Link}
+              to="/register"
               sx={{
                 bgcolor: "#0f766e",
                 px: 5,
