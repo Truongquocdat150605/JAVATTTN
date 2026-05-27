@@ -6,7 +6,7 @@ import {
   Alert, Box, Button, Card, CardActions, CardContent, CardMedia,
   Container, Grid, MenuItem, Stack, Typography, Select,
   Paper, TextField, InputAdornment, IconButton, Skeleton,
-  Chip, Rating, useScrollTrigger, Zoom, Fab,
+  Chip, Rating, useScrollTrigger, Zoom, Fab, // useScrollTrigger moved here
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
@@ -22,6 +22,7 @@ import {
   EmojiEmotions as EmojiEmotionsIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+// import { useTheme } from "@mui/material/styles"; // Removed as useScrollTrigger is no longer here
 
 const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600";
 const IMAGE_BASE = "http://localhost:8082/uploads/";
