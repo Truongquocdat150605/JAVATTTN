@@ -1,4 +1,3 @@
-// entire file content ...
 package com.example.quanliPT.service;
 
 import com.example.quanliPT.model.Contract;
@@ -11,6 +10,7 @@ import com.example.quanliPT.repository.ContractRepository;
 import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // Thêm import này
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +21,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j // Thêm annotation này
 public class ContractBusinessService {
 
     private final ContractRepository contractRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final BillingService billingService;  // <-- ĐẢM BẢO CÓ DÒNG NÀY
+    private final BillingService billingService;
 
     @Transactional
     public Contract createContractAndTenant(
@@ -87,6 +88,7 @@ public class ContractBusinessService {
 
         // 4. Đổi trạng thái phòng
         room.setStatus(RoomStatus.OCCUPIED);
+        log.info("ContractBusinessService: Đang cập nhật trạng thái phòng ID {} thành {}", room.getId(), room.getStatus()); // Thêm log
         roomRepository.save(room);
 
         // 5. Tự động tạo hóa đơn kỳ đầu
@@ -99,4 +101,3 @@ public class ContractBusinessService {
         return contract;
     }
 }
-// ... goes in between

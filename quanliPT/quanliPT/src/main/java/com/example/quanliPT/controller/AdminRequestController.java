@@ -1,4 +1,3 @@
-// entire file content ...
 package com.example.quanliPT.controller;
 
 import com.example.quanliPT.model.ContactMessage;
@@ -13,6 +12,7 @@ import com.example.quanliPT.repository.RentalRequestRepository;
 import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // Thêm import này
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +25,7 @@ import java.util.List;
 @RequestMapping("/api/admin/requests")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j // Thêm annotation này
 public class AdminRequestController {
 
     private final RentalRequestRepository rentalRequestRepository;
@@ -82,9 +83,10 @@ public class AdminRequestController {
                 deposit
         );
 
-        // ✅ THÊM ĐOẠN CODE NÀY - Cập nhật trạng thái phòng
+        // ✅ THÊM ĐOẠN CODE NÀY - Cập nhật trạng thái phòng (Lưu ý: logic này đã có trong service, có thể cân nhắc xóa để tránh trùng lặp)
         if (room != null) {
             room.setStatus(RoomStatus.OCCUPIED);
+            log.info("AdminRequestController: Đang cập nhật trạng thái phòng ID {} thành {}", room.getId(), room.getStatus()); // Thêm log
             roomRepository.save(room);
         }
 
@@ -94,4 +96,3 @@ public class AdminRequestController {
         return ResponseEntity.ok(savedContract);
     }
 }
-// ... goes in between

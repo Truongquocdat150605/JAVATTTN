@@ -1,4 +1,3 @@
-// entire file content ...
 package com.example.quanliPT.controller;
 
 import com.example.quanliPT.model.Contract;
@@ -9,6 +8,7 @@ import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import com.example.quanliPT.service.ContractBusinessService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // Thêm import này
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,12 +21,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contracts")
 @RequiredArgsConstructor
+@Slf4j // Thêm annotation này
 public class ContractController {
 
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
-    private final ContractBusinessService contractBusinessService;  // <-- THÊM DÒNG NÀY
+    private final ContractBusinessService contractBusinessService;
 
     // ========== API HIỆN CÓ ==========
     @GetMapping
@@ -55,6 +56,7 @@ public class ContractController {
         Contract saved = contractRepository.save(contract);
         if (saved.getRoom() != null) {
             saved.getRoom().setStatus(RoomStatus.OCCUPIED);
+            log.info("ContractController: createContract: Đang cập nhật trạng thái phòng ID {} thành {}", saved.getRoom().getId(), saved.getRoom().getStatus()); // Thêm log
             roomRepository.save(saved.getRoom());
         }
         return ResponseEntity.ok(saved);
@@ -106,6 +108,7 @@ public class ContractController {
                     || saved.getStatus() == ContractStatus.EXPIRED
                     || saved.getStatus() == ContractStatus.TERMINATED;
             saved.getRoom().setStatus(shouldFreeRoom ? RoomStatus.AVAILABLE : RoomStatus.OCCUPIED);
+            log.info("ContractController: updateContract: Đang cập nhật trạng thái phòng ID {} thành {}", saved.getRoom().getId(), saved.getRoom().getStatus()); // Thêm log
             roomRepository.save(saved.getRoom());
         }
 
@@ -128,4 +131,3 @@ public class ContractController {
         return ResponseEntity.noContent().build();
     }
 }
-// ... goes in between
