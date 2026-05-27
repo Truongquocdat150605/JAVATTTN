@@ -3,10 +3,32 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { formatVND } from "../../utils/formatVND";
 import {
-  Alert, Box, Button, Card, CardActions, CardContent, CardMedia,
-  Container, Grid, MenuItem, Stack, Typography, Select,
-  Paper, TextField, InputAdornment, IconButton, Skeleton,
-  Chip, Rating, useScrollTrigger, Zoom, Fab, // useScrollTrigger moved here
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Chip,
+  Container,
+  Grid,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Rating,
+  Skeleton,
+  Stack,
+  TextField,
+  Typography,
+  Select,
+  MenuItem,
+  useScrollTrigger,
+  Zoom,
+  Fab,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
@@ -20,9 +42,9 @@ import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   Whatshot as WhatshotIcon,
   EmojiEmotions as EmojiEmotionsIcon,
+  ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-// import { useTheme } from "@mui/material/styles"; // Removed as useScrollTrigger is no longer here
 
 const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600";
 const IMAGE_BASE = "http://localhost:8082/uploads/";
@@ -32,7 +54,9 @@ const getRoomImageUrl = (imageFileName) => {
   return `${IMAGE_BASE}${imageFileName}`;
 };
 
+// ---------------------------------------------------------------------------
 // Scroll to top button
+// ---------------------------------------------------------------------------
 function ScrollTop() {
   const trigger = useScrollTrigger({
     disableHysteresis: true,
@@ -63,7 +87,9 @@ function ScrollTop() {
   );
 }
 
+// ---------------------------------------------------------------------------
 // Feature Card
+// ---------------------------------------------------------------------------
 const FeatureCard = ({ icon, title, desc, delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
@@ -111,28 +137,31 @@ const FeatureCard = ({ icon, title, desc, delay }) => (
   </motion.div>
 );
 
-// Room Card Component
+// ---------------------------------------------------------------------------
+// Room Card
+// ---------------------------------------------------------------------------
 const RoomCard = memo(({ room, onViewDetail, index }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay: index * 0.1 }}
   >
-    <Card sx={{
-      borderRadius: "20px",
-      height: "100%",
-      overflow: "hidden",
-      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-      cursor: "pointer",
-      position: "relative",
-      "&:hover": {
-        transform: "translateY(-8px)",
-        boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
-        "& .card-overlay": { opacity: 1 },
-        "& .card-image": { transform: "scale(1.05)" },
-      },
-    }}
-    onClick={() => onViewDetail(room.id)}
+    <Card
+      sx={{
+        borderRadius: "20px",
+        height: "100%",
+        overflow: "hidden",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        cursor: "pointer",
+        position: "relative",
+        "&:hover": {
+          transform: "translateY(-8px)",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+          "& .card-overlay": { opacity: 1 },
+          "& .card-image": { transform: "scale(1.05)" },
+        },
+      }}
+      onClick={() => onViewDetail(room.id)}
     >
       <Box sx={{ position: "relative", overflow: "hidden" }}>
         <CardMedia
@@ -185,7 +214,7 @@ const RoomCard = memo(({ room, onViewDetail, index }) => (
           }}
         />
       </Box>
-      
+
       <CardContent sx={{ p: 2.5 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
           <Typography variant="h6" sx={{ fontWeight: 900, fontSize: "1.25rem" }}>
@@ -193,16 +222,18 @@ const RoomCard = memo(({ room, onViewDetail, index }) => (
           </Typography>
           <Rating value={4.5} size="small" readOnly precision={0.5} />
         </Stack>
-        
+
         <Stack spacing={1.5} mt={1}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <AttachMoneyIcon sx={{ fontSize: 18, color: "#0f766e" }} />
             <Typography variant="body1" sx={{ fontWeight: 800, color: "#0f766e" }}>
               {formatVND(room.price)}
             </Typography>
-            <Typography variant="caption" color="text.secondary">/ tháng</Typography>
+            <Typography variant="caption" color="text.secondary">
+              / tháng
+            </Typography>
           </Box>
-          
+
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <SquareFootIcon sx={{ fontSize: 18, color: "#94a3b8" }} />
             <Typography variant="body2" color="text.secondary">
@@ -213,7 +244,7 @@ const RoomCard = memo(({ room, onViewDetail, index }) => (
               Phòng trọ
             </Typography>
           </Box>
-          
+
           {room.address && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <LocationOnIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
@@ -224,7 +255,7 @@ const RoomCard = memo(({ room, onViewDetail, index }) => (
           )}
         </Stack>
       </CardContent>
-      
+
       <CardActions sx={{ p: 2.5, pt: 0 }}>
         <Button
           fullWidth
@@ -248,6 +279,59 @@ const RoomCard = memo(({ room, onViewDetail, index }) => (
   </motion.div>
 ));
 
+// ---------------------------------------------------------------------------
+// Testimonial Card
+// ---------------------------------------------------------------------------
+const TestimonialCard = ({ avatar, name, comment }) => (
+  <Card
+    sx={{
+      p: 3,
+      textAlign: "center",
+      borderRadius: 4,
+      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+    }}
+  >
+    <Box
+      sx={{
+        width: 80,
+        height: 80,
+        mx: "auto",
+        mb: 2,
+        borderRadius: "50%",
+        overflow: "hidden",
+        border: "2px solid #0f766e",
+      }}
+    >
+      <img src={avatar} alt={name} style={{ width: "100%", height: "100%" }} />
+    </Box>
+    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+      {name}
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      {comment}
+    </Typography>
+  </Card>
+);
+
+// ---------------------------------------------------------------------------
+// FAQ Item
+// ---------------------------------------------------------------------------
+const FAQItem = ({ question, answer }) => (
+  <Accordion>
+    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        {question}
+      </Typography>
+    </AccordionSummary>
+    <AccordionDetails>
+      <Typography variant="body2">{answer}</Typography>
+    </AccordionDetails>
+  </Accordion>
+);
+
+// ---------------------------------------------------------------------------
+// Main HomePage Component
+// ---------------------------------------------------------------------------
 const HomePage = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -257,6 +341,9 @@ const HomePage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const navigate = useNavigate();
 
+  // -----------------------------------------------------------------------
+  // Load rooms
+  // -----------------------------------------------------------------------
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -271,15 +358,21 @@ const HomePage = () => {
       }
     };
     load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
+  // -----------------------------------------------------------------------
+  // Filters
+  // -----------------------------------------------------------------------
   const filteredRooms = rooms.filter((r) => {
     const price = Number(r.price);
     const area = Number(r.area);
     const matchPrice = !maxPrice || price <= Number(maxPrice);
     const matchArea = !minArea || area >= Number(minArea);
-    const matchSearch = !searchKeyword ||
+    const matchSearch =
+      !searchKeyword ||
       r.roomNumber?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
       r.address?.toLowerCase().includes(searchKeyword.toLowerCase());
     return matchPrice && matchArea && matchSearch;
@@ -298,14 +391,67 @@ const HomePage = () => {
   const featuredRooms = filteredRooms.slice(0, 6);
 
   const features = [
-    { icon: <VerifiedIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "Uy tín hàng đầu", desc: "Cam kết minh bạch, rõ ràng trong mọi giao dịch" },
-    { icon: <SecurityIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "An toàn & Bảo mật", desc: "Thông tin cá nhân được bảo vệ tuyệt đối" },
-    { icon: <SupportAgentIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "Hỗ trợ 24/7", desc: "Đội ngũ chăm sóc khách hàng nhiệt tình" },
+    {
+      icon: <VerifiedIcon sx={{ fontSize: 35, color: "#0f766e" }} />,
+      title: "Uy tín hàng đầu",
+      desc: "Cam kết minh bạch, rõ ràng trong mọi giao dịch",
+    },
+    {
+      icon: <SecurityIcon sx={{ fontSize: 35, color: "#0f766e" }} />,
+      title: "An toàn & Bảo mật",
+      desc: "Thông tin cá nhân được bảo vệ tuyệt đối",
+    },
+    {
+      icon: <SupportAgentIcon sx={{ fontSize: 35, color: "#0f766e" }} />,
+      title: "Hỗ trợ 24/7",
+      desc: "Đội ngũ chăm sóc khách hàng nhiệt tình",
+    },
   ];
 
+  // -----------------------------------------------------------------------
+  // Data for Testimonials & FAQ
+  // -----------------------------------------------------------------------
+  const testimonials = [
+    {
+      avatar: "https://i.pravatar.cc/150?img=1",
+      name: "Nguyễn Văn A",
+      comment: "Dịch vụ tuyệt vời, phòng sạch, vị trí thuận tiện. Mình đã thuê 3 tháng và rất hài lòng.",
+    },
+    {
+      avatar: "https://i.pravatar.cc/150?img=2",
+      name: "Trần Thị B",
+      comment: "Quá trình đặt phòng nhanh gọn, hỗ trợ khách hàng nhiệt tình. Sẽ giới thiệu cho bạn bè.",
+    },
+    {
+      avatar: "https://i.pravatar.cc/150?img=3",
+      name: "Lê Văn C",
+      comment: "Thanh toán QR rất tiện lợi, không lo mất tiền. Đề xuất thêm các gói khuyến mãi.",
+    },
+  ];
+
+  const faqs = [
+    {
+      question: "Làm sao để đặt phòng nhanh?",
+      answer: "Bạn chỉ cần vào mục Danh sách phòng, lọc theo tiêu chí, chọn phòng và nhấn ‘Thuê ngay’. Hệ thống sẽ hướng dẫn các bước tiếp theo.",
+    },
+    {
+      question: "Có thể thanh toán bằng phương thức nào?",
+      answer: "Hiện tại hỗ trợ thanh toán qua QR, Stripe và PayOS. Tất cả đều được mã hoá bảo mật.",
+    },
+    {
+      question: "Nếu phòng có vấn đề bảo trì thì làm sao?",
+      answer: "Vào mục Bảo trì, chọn phòng đang thuê, mô tả sự cố và gửi. Đội ngũ sẽ phản hồi trong vòng 24h.",
+    },
+  ];
+
+  // -----------------------------------------------------------------------
+  // Render
+  // -----------------------------------------------------------------------
   return (
     <>
-      {/* Hero Section with Gradient */}
+      {/* ------------------------------------------------------------------- */}
+      {/* Hero Section */}
+      {/* ------------------------------------------------------------------- */}
       <Box
         sx={{
           position: "relative",
@@ -437,8 +583,10 @@ const HomePage = () => {
         </Container>
       </Box>
 
+      {/* ------------------------------------------------------------------- */}
+      {/* Features Section */}
+      {/* ------------------------------------------------------------------- */}
       <Container maxWidth="xl" sx={{ py: 8 }}>
-        {/* Features Section */}
         <Box sx={{ mb: 8 }}>
           <Typography
             variant="h3"
@@ -470,7 +618,9 @@ const HomePage = () => {
           </Grid>
         </Box>
 
+        {/* ------------------------------------------------------------------- */}
         {/* Filter Section */}
+        {/* ------------------------------------------------------------------- */}
         <Paper
           elevation={0}
           sx={{
@@ -529,7 +679,9 @@ const HomePage = () => {
           </Stack>
         </Paper>
 
+        {/* ------------------------------------------------------------------- */}
         {/* Loading & Error */}
+        {/* ------------------------------------------------------------------- */}
         {loading && (
           <Grid container spacing={3}>
             {Array.from(new Array(6)).map((_, index) => (
@@ -548,7 +700,9 @@ const HomePage = () => {
           </Alert>
         )}
 
+        {/* ------------------------------------------------------------------- */}
         {/* Rooms Grid */}
+        {/* ------------------------------------------------------------------- */}
         {!loading && !errorMsg && (
           <>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
@@ -606,59 +760,111 @@ const HomePage = () => {
             )}
           </>
         )}
-      </Container>
 
-      {/* CTA Section */}
-      <Box
-        sx={{
-          bgcolor: "#0f172a",
-          py: 8,
-          mt: 6,
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-        }}
-      >
-        <Container maxWidth="md">
+        {/* ------------------------------------------------------------------- */}
+        {/* Testimonial Section */}
+        {/* ------------------------------------------------------------------- */}
+        <Box sx={{ mt: 12, mb: 8 }}>
           <Typography
             variant="h3"
             sx={{
               fontWeight: 900,
               textAlign: "center",
-              color: "white",
-              mb: 2,
-              fontSize: { xs: "1.8rem", md: "2.5rem" },
+              mb: 4,
+              background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
             }}
           >
-            Sẵn sàng tìm phòng trọ lý tưởng?
+            Khách Hàng Nói Gì?
           </Typography>
+          <Grid container spacing={4}>
+            {testimonials.map((t, idx) => (
+              <Grid item xs={12} md={4} key={idx}>
+                <TestimonialCard {...t} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        {/* ------------------------------------------------------------------- */}
+        {/* FAQ Section */}
+        {/* ------------------------------------------------------------------- */}
+        <Box sx={{ mb: 12 }}>
           <Typography
-            variant="body1"
-            sx={{ textAlign: "center", color: "rgba(255,255,255,0.8)", mb: 4 }}
+            variant="h3"
+            sx={{
+              fontWeight: 900,
+              textAlign: "center",
+              mb: 4,
+              background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+            }}
           >
-            Đăng ký ngay để nhận ưu đãi đặc biệt và cập nhật phòng trọ mới nhất
+            Câu Hỏi Thường Gặp
           </Typography>
-          <Box sx={{ textAlign: "center" }}>
-            <Button
-              variant="contained"
-              size="large"
-              component={Link}
-              to="/register"
+          {faqs.map((item, idx) => (
+            <FAQItem key={idx} question={item.question} answer={item.answer} />
+          ))}
+        </Box>
+
+        {/* ------------------------------------------------------------------- */}
+        {/* CTA Section */}
+        {/* ------------------------------------------------------------------- */}
+        <Box
+          sx={{
+            bgcolor: "#0f172a",
+            py: 8,
+            mt: 6,
+            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          }}
+        >
+          <Container maxWidth="md">
+            <Typography
+              variant="h3"
               sx={{
-                bgcolor: "#0f766e",
-                px: 5,
-                py: 1.5,
-                borderRadius: 3,
-                fontSize: "1.1rem",
-                fontWeight: 700,
-                "&:hover": { bgcolor: "#0d9488", transform: "translateY(-2px)" },
+                fontWeight: 900,
+                textAlign: "center",
+                color: "white",
+                mb: 2,
+                fontSize: { xs: "1.8rem", md: "2.5rem" },
               }}
             >
-              Đăng ký ngay
-            </Button>
-          </Box>
-        </Container>
-      </Box>
+              Sẵn sàng tìm phòng trọ lý tưởng?
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ textAlign: "center", color: "rgba(255,255,255,0.8)", mb: 4 }}
+            >
+              Đăng ký ngay để nhận ưu đãi đặc biệt và cập nhật phòng trọ mới nhất
+            </Typography>
+            <Box sx={{ textAlign: "center" }}>
+              <Button
+                variant="contained"
+                size="large"
+                component={Link}
+                to="/register"
+                sx={{
+                  bgcolor: "#0f766e",
+                  px: 5,
+                  py: 1.5,
+                  borderRadius: 3,
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  "&:hover": { bgcolor: "#0d9488", transform: "translateY(-2px)" },
+                }}
+              >
+                Đăng ký ngay
+              </Button>
+            </Box>
+          </Container>
+        </Box>
 
-      <ScrollTop />
+        <ScrollTop />
+      </Container>
     </>
   );
 };
