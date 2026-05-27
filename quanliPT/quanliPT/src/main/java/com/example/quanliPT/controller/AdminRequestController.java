@@ -94,12 +94,8 @@ public class AdminRequestController {
                 deposit
         );
 
-        // ✅ THÊM ĐOẠN CODE NÀY - Cập nhật trạng thái phòng (Lưu ý: logic này đã có trong service, có thể cân nhắc xóa để tránh trùng lặp)
-        if (room != null) {
-            room.setStatus(RoomStatus.OCCUPIED);
-            log.info("AdminRequestController: Đang cập nhật trạng thái phòng ID {} thành {}", room.getId(), room.getStatus());
-            roomRepository.save(room);
-        }
+        // Trạng thái phòng đã được cập nhật trong contractBusinessService.createContractAndTenant()
+        // Không cần thiết lập lại ở đây để tránh thao tác thừa
 
         request.setStatus(RentalRequestStatus.APPROVED);
         rentalRequestRepository.save(request);
