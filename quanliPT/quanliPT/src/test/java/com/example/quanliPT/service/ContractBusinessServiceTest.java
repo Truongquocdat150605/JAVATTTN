@@ -1,9 +1,6 @@
 package com.example.quanliPT.service;
 
-import com.example.quanliPT.model.Contract;
-import com.example.quanliPT.model.Room;
-import com.example.quanliPT.model.RoomStatus;
-import com.example.quanliPT.model.User;
+import com.example.quanliPT.model.*;
 import com.example.quanliPT.repository.ContractRepository;
 import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
@@ -34,68 +31,92 @@ public class ContractBusinessServiceTest {
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private BillingService billingService;
 
     @InjectMocks
     private ContractBusinessService contractBusinessService;
 
     private Room mockRoom;
-    private User mockTenant;
+    private User mockUser;
 
     @BeforeEach
     void setUp() {
-        mockRoom = new Room();
-        mockRoom.setId(1L);
-        mockRoom.setStatus(RoomStatus.AVAILABLE);
+        mockRoom = Room.builder()
+                .id(1L)
+                .status(RoomStatus.AVAILABLE)
+                .build();
 
-        mockTenant = new User();
-        mockTenant.setId(1L);
-        mockTenant.setEmail("test@tenant.com");
+        mockUser = User.builder()
+                .id(1L)
+                .username("0123456789")
+                .phone("0123456789")
+                .fullName("Nguyen Van A")
+                .build();
     }
 
     @Test
-    @SuppressWarnings("null")
-    void testCreateContract_Success_NewTenant() {
+    void testCreateContractAndTenant_Success_NewTenant() {
+        // Arrange
         when(roomRepository.findById(1L)).thenReturn(Optional.of(mockRoom));
-        when(userRepository.findByEmail("new@tenant.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("123456")).thenReturn("hashedPassword");
-        
-        User savedUser = new User();
-        savedUser.setEmail("new@tenant.com");
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        
-        Contract savedContract = new Contract();
-        savedContract.setId(100L);
-        when(contractRepository.save(any(Contract.class))).thenReturn(savedContract);
+        when(userRepository.findByPhone("0123456789")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
+        when(userRepository.save(any(User.class))).thenReturn(mockUser);
+        when(contractRepository.save(any(Contract.class))).thenReturn(Contract.builder().id(100L).build());
 
+        // Act
         Contract result = contractBusinessService.createContractAndTenant(
-                1L, "Nguyen Van A", "new@tenant.com", "0123456789", "123456789",
+                1L, "Nguyen Van A", "a@gmail.com", "0123456789", "123456789",
                 LocalDate.now(), LocalDate.now().plusMonths(6),
                 BigDecimal.valueOf(3000000), BigDecimal.valueOf(3000000)
         );
 
+        // Assert
         assertNotNull(result);
         assertEquals(RoomStatus.OCCUPIED, mockRoom.getStatus());
         verify(userRepository, times(1)).save(any(User.class));
         verify(roomRepository, times(1)).save(mockRoom);
         verify(contractRepository, times(1)).save(any(Contract.class));
+        verify(billingService, times(1)).generateInvoiceForContract(any(Contract.class));
     }
 
     @Test
-    @SuppressWarnings("null")
-    void testCreateContract_Fail_RoomNotAvailable() {
-        mockRoom.setStatus(RoomStatus.OCCUPIED);
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(mockRoom));
+    void testCreateContractAndTenant_Fail_RoomNotFound() {
+        // Arrange
+        when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
+        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             contractBusinessService.createContractAndTenant(
-                    1L, "Nguyen Van A", "new@tenant.com", "0123456789", "123456789",
+                    1L, "Nguyen Van A", "a@gmail.com", "0123456789", "123456789",
                     LocalDate.now(), LocalDate.now().plusMonths(6),
                     BigDecimal.valueOf(3000000), BigDecimal.valueOf(3000000)
             );
         });
 
-        assertEquals("Phòng không ở trạng thái trống để thuê.", exception.getMessage());
-        verify(userRepository, never()).save(any(User.class));
-        verify(contractRepository, never()).save(any(Contract.class));
+        assertEquals("Không tìm thấy phòng", exception.getMessage());
+        verify(contractRepository, never()).save(any());
+    }
+
+    @Test
+    void testCreateContractAndTenant_Success_ExistingTenant() {
+        // Arrange
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(mockRoom));
+        when(userRepository.findByPhone("0123456789")).thenReturn(Optional.of(mockUser));
+        when(userRepository.save(any(User.class))).thenReturn(mockUser);
+        when(contractRepository.save(any(Contract.class))).thenReturn(Contract.builder().id(100L).build());
+
+        // Act
+        Contract result = contractBusinessService.createContractAndTenant(
+                1L, "Nguyen Van A Updated", "updated@gmail.com", "0123456789", "123456789",
+                LocalDate.now(), LocalDate.now().plusMonths(6),
+                BigDecimal.valueOf(3000000), BigDecimal.valueOf(3000000)
+        );
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(RoomStatus.OCCUPIED, mockRoom.getStatus());
+        verify(userRepository, times(1)).save(mockUser); // Chỉ update, không tạo mới
+        verify(passwordEncoder, never()).encode(anyString());
     }
 }
