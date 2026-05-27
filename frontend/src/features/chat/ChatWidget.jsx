@@ -13,6 +13,8 @@ const ChatWidget = () => {
       { keys: ["hóa đơn", "thanh toán"], text: "Bạn vào mục Hóa đơn của tôi để xem chi tiết và thanh toán online bằng QR." },
       { keys: ["bảo trì", "hỏng", "sửa"], text: "Bạn vào mục Bảo trì, chọn phòng đang thuê và mô tả sự cố để admin xử lý." },
       { keys: ["hợp đồng"], text: "Bạn vào mục Hợp đồng để xem thời hạn, giá thuê và trạng thái hợp đồng hiện tại." },
+      { keys: ["thông tin", "phòng"], text: "Bạn có thể xem thông tin chi tiết về phòng, bao gồm giá, diện tích, và tiện ích." },
+      { keys: ["hỗ trợ", "khách hàng"], text: "Bạn có thể liên hệ với chúng tôi qua mục Hỗ trợ khách hàng để được giải đáp thắc mắc." },
     ],
     []
   );
