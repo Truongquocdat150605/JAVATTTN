@@ -6,12 +6,15 @@ import com.example.quanliPT.model.RoomStatus;
 import com.example.quanliPT.repository.ContractRepository;
 import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
+import com.example.quanliPT.service.ContractBusinessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -22,7 +25,9 @@ public class ContractController {
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
+    private final ContractBusinessService contractBusinessService;  // <-- THÊM DÒNG NÀY
 
+    // ========== API HIỆN CÓ ==========
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<Contract> getAllContracts() {
@@ -42,6 +47,7 @@ public class ContractController {
         return contractRepository.findByTenantId(user.getId());
     }
 
+    // ========== API HIỆN CÓ (Chỉ nhận Contract object, KHÔNG tạo tenant) ==========
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Contract> createContract(@RequestBody Contract contract) {
@@ -53,6 +59,35 @@ public class ContractController {
         return ResponseEntity.ok(saved);
     }
 
+    // ========== API MỚI: Tạo hợp đồng + Tự động tạo Tenant nếu chưa có ==========
+    @PostMapping("/create-with-tenant")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Contract> createContractWithTenant(
+            @RequestParam Long roomId,
+            @RequestParam String tenantFullName,
+            @RequestParam String tenantEmail,
+            @RequestParam String tenantPhone,
+            @RequestParam(required = false) String tenantIdentity,
+            @RequestParam String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam BigDecimal rentPrice,
+            @RequestParam BigDecimal deposit) {
+
+        Contract contract = contractBusinessService.createContractAndTenant(
+                roomId,
+                tenantFullName,
+                tenantEmail,
+                tenantPhone,
+                tenantIdentity,
+                LocalDate.parse(startDate),
+                endDate != null ? LocalDate.parse(endDate) : null,
+                rentPrice,
+                deposit
+        );
+        return ResponseEntity.ok(contract);
+    }
+
+    // ========== API HIỆN CÓ ==========
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody Contract contractDetails) {

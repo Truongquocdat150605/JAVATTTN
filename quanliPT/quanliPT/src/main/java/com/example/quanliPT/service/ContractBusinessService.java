@@ -26,11 +26,8 @@ public class ContractBusinessService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final BillingService billingService;
+    private final BillingService billingService;  // <-- ĐẢM BẢO CÓ DÒNG NÀY
 
-    /**
-     * Tạo hợp đồng mới và cấp tài khoản Tenant nếu chưa có
-     */
     @Transactional
     public Contract createContractAndTenant(
             Long roomId,
@@ -43,17 +40,22 @@ public class ContractBusinessService {
             BigDecimal rentPrice,
             BigDecimal deposit) {
 
-        // 1. Kiểm tra phòng và lấy thông tin
+        // 1. Lấy phòng
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
 
-        // 2. Xử lý User (Lấy sẵn hoặc tạo mới)
+        // 2. Tìm hoặc tạo User
         String loginIdentifier = tenantPhone;
         Optional<User> existingUser = userRepository.findByPhone(loginIdentifier);
 
         User tenant;
         if (existingUser.isPresent()) {
             tenant = existingUser.get();
+            // Cập nhật thông tin nếu cần
+            if (tenantEmail != null) tenant.setEmail(tenantEmail);
+            if (tenantFullName != null) tenant.setFullName(tenantFullName);
+            if (tenantIdentity != null) tenant.setIdentityNumber(tenantIdentity);
+            tenant = userRepository.save(tenant);
         } else {
             tenant = User.builder()
                     .username(tenantPhone)
@@ -68,7 +70,7 @@ public class ContractBusinessService {
             tenant = userRepository.save(tenant);
         }
 
-        // 3. Tạo Hợp đồng
+        // 3. Tạo hợp đồng
         Contract contract = Contract.builder()
                 .room(room)
                 .tenant(tenant)
@@ -82,20 +84,14 @@ public class ContractBusinessService {
 
         contract = contractRepository.save(contract);
 
-        // 4. Đổi trạng thái Room
+        // 4. Đổi trạng thái phòng
         room.setStatus(RoomStatus.OCCUPIED);
         roomRepository.save(room);
 
-        // 5. MỚI: Tự động tạo hóa đơn kỳ đầu tiên
-        // Chúng ta gọi BillingService để hệ thống tự tạo hóa đơn ngay khi ký hợp đồng
-        // Đảm bảo BillingService của bạn có hàm generateInvoiceForContract(Contract
-        // contract)
+        // 5. Tự động tạo hóa đơn kỳ đầu
         try {
-            // Nếu bạn chưa có hàm generateInvoiceForContract, hãy báo mình để mình viết
-            // cho!
             billingService.generateInvoiceForContract(contract);
         } catch (Exception e) {
-            // Log lỗi để admin biết, nhưng không làm rollback cả hợp đồng
             System.err.println("Lỗi khi tự động tạo hóa đơn: " + e.getMessage());
         }
 

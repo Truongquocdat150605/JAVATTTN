@@ -2,7 +2,6 @@ package com.example.quanliPT.controller;
 
 import com.example.quanliPT.model.ContactMessage;
 import com.example.quanliPT.model.Contract;
-import com.example.quanliPT.model.ContractStatus;
 import com.example.quanliPT.model.RentalRequest;
 import com.example.quanliPT.model.RentalRequestStatus;
 import com.example.quanliPT.model.RoomStatus;
@@ -81,6 +80,12 @@ public class AdminRequestController {
                 rentPrice,
                 deposit
         );
+
+        // ✅ THÊM ĐOẠN CODE NÀY - Cập nhật trạng thái phòng
+        if (room != null) {
+            room.setStatus(RoomStatus.OCCUPIED);
+            roomRepository.save(room);
+        }
 
         request.setStatus(RentalRequestStatus.APPROVED);
         rentalRequestRepository.save(request);
