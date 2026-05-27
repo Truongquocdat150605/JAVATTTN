@@ -24,6 +24,7 @@ import {
   Star as StarIcon,
   Whatshot as WhatshotIcon,
   EmojiEmotions as EmojiEmotionsIcon,
+  FormatQuote as QuoteIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 
@@ -251,6 +252,61 @@ const RoomCard = memo(({ room, onViewDetail, index }) => (
   </motion.div>
 ));
 
+// Testimonial Card Component
+const TestimonialCard = ({ name, role, rating, text, avatarSrc, delay }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay }}
+  >
+    <Paper
+      sx={{
+        p: 3,
+        borderRadius: 4,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+        position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: -15,
+          left: -15,
+          fontSize: 80,
+          color: "rgba(15,118,110,0.05)",
+          zIndex: 0,
+          fontFamily: "serif",
+          content: '"“"',
+        },
+      }}
+    >
+      <Box sx={{ zIndex: 1 }}>
+        <Rating value={rating} readOnly size="small" sx={{ mb: 1 }} />
+        <Typography variant="body1" color="text.secondary" sx={{ fontStyle: "italic", mb: 2 }}>
+          "{text}"
+        </Typography>
+      </Box>
+      <Stack direction="row" alignItems="center" spacing={2} sx={{ mt: "auto", zIndex: 1 }}>
+        <Avatar src={avatarSrc} sx={{ bgcolor: "#0f766e" }}>
+          {name.charAt(0)}
+        </Avatar>
+        <Box>
+          <Typography variant="subtitle1" fontWeight={700}>
+            {name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {role}
+          </Typography>
+        </Box>
+      </Stack>
+    </Paper>
+  </motion.div>
+);
+
+
 const HomePage = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -305,6 +361,30 @@ const HomePage = () => {
     { icon: <VerifiedIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "Uy tín hàng đầu", desc: "Cam kết minh bạch, rõ ràng trong mọi giao dịch" },
     { icon: <SecurityIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "An toàn & Bảo mật", desc: "Thông tin cá nhân được bảo vệ tuyệt đối" },
     { icon: <SupportAgentIcon sx={{ fontSize: 35, color: "#0f766e" }} />, title: "Hỗ trợ 24/7", desc: "Đội ngũ chăm sóc khách hàng nhiệt tình" },
+  ];
+
+  const testimonials = [
+    {
+      name: "Nguyễn Thị B",
+      role: "Khách thuê",
+      rating: 5,
+      text: "Tìm được phòng ưng ý với giá tốt, dịch vụ hỗ trợ rất nhiệt tình. Rất hài lòng!",
+      avatarSrc: "https://randomuser.me/api/portraits/women/1.jpg",
+    },
+    {
+      name: "Trần Văn C",
+      role: "Khách thuê",
+      rating: 4.5,
+      text: "Giao diện dễ sử dụng, thông tin phòng rõ ràng. Quá trình thuê nhanh chóng.",
+      avatarSrc: "https://randomuser.me/api/portraits/men/2.jpg",
+    },
+    {
+      name: "Lê Thị D",
+      role: "Khách thuê",
+      rating: 5,
+      text: "Hệ thống quản lý hợp đồng và hóa đơn rất tiện lợi, không cần lo lắng quên thanh toán.",
+      avatarSrc: "https://randomuser.me/api/portraits/women/3.jpg",
+    },
   ];
 
   return (
@@ -610,6 +690,38 @@ const HomePage = () => {
             )}
           </>
         )}
+
+        {/* Testimonials Section */}
+        <Box sx={{ my: 8 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 900,
+              textAlign: "center",
+              mb: 2,
+              background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            Khách Hàng Nói Gì Về Chúng Tôi?
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ textAlign: "center", mb: 6, maxWidth: 600, mx: "auto" }}
+          >
+            Những đánh giá chân thực từ cộng đồng khách thuê của Smart Phòng Trọ
+          </Typography>
+          <Grid container spacing={3}>
+            {testimonials.map((testimonial, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <TestimonialCard {...testimonial} delay={index * 0.1} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       </Container>
 
       {/* CTA Section */}
