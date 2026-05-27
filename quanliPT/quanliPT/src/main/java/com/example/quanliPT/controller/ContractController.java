@@ -1,3 +1,4 @@
+// entire file content ...
 package com.example.quanliPT.controller;
 
 import com.example.quanliPT.model.Contract;
@@ -127,3 +128,4 @@ public class ContractController {
         return ResponseEntity.noContent().build();
     }
 }
+// ... goes in between

@@ -1,3 +1,4 @@
+// entire file content ...
 package com.example.quanliPT.controller;
 
 import com.example.quanliPT.model.ContactMessage;
@@ -93,3 +94,4 @@ public class AdminRequestController {
         return ResponseEntity.ok(savedContract);
     }
 }
+// ... goes in between

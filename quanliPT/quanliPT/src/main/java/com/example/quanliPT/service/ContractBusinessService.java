@@ -1,3 +1,4 @@
+// entire file content ...
 package com.example.quanliPT.service;
 
 import com.example.quanliPT.model.Contract;
@@ -98,3 +99,4 @@ public class ContractBusinessService {
         return contract;
     }
 }
+// ... goes in between
