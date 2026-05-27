@@ -22,7 +22,7 @@ const ChatWidget = () => {
   const askBot = (question) => {
     const q = question.toLowerCase();
     const found = cannedAnswers.find((item) => item.keys.some((k) => q.includes(k)));
-    return found ? found.text : "Mình đã ghi nhận câu hỏi. Bạn thử nêu rõ hơn theo chủ đề: phòng trống, hợp đồng, hóa đơn hoặc bảo trì nhé.";
+    return found ? found.text : "Cảm ơn bạn đã nhắn! Mình chưa hiểu rõ, bạn có thể mô tả thêm về nhu cầu tìm phòng, hợp đồng, hóa đơn hoặc bảo trì không ạ?";
   };
 
   const send = () => {
