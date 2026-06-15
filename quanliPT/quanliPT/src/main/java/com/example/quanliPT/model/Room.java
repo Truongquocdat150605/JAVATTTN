@@ -31,13 +31,11 @@ public class Room {
     private double area;
     private String description;
     private String image;
+    @Column(nullable = true) // có thể null vì phòng cũ chưa có dữ liệu
+    private Integer floor;
 
     @ManyToMany
-    @JoinTable(
-        name = "room_services_mapping",
-        joinColumns = @JoinColumn(name = "room_id"),
-        inverseJoinColumns = @JoinColumn(name = "service_id")
-    )
+    @JoinTable(name = "room_services_mapping", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "service_id"))
     @Builder.Default
     private Set<RentalService> services = new HashSet<>();
 

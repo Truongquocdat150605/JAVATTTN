@@ -52,11 +52,25 @@ public class MaintenanceController {
 
     @PostMapping
     @PreAuthorize("hasRole('TENANT')")
-    public ResponseEntity<MaintenanceRequest> createIssue(
+    public ResponseEntity<?> createIssue(
             Authentication authentication,
-            @RequestParam Long roomId,
-            @RequestParam String description
+            @RequestParam(required = false) Long roomId,
+            @RequestParam(required = false) String description
     ) {
+        // Validation: kiểm tra dữ liệu đầu vào
+        if (roomId == null) {
+            return ResponseEntity.badRequest().body(
+                    java.util.Map.of("error", "Vui lòng chọn phòng cần bảo trì"));
+        }
+        if (description == null || description.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    java.util.Map.of("error", "Vui lòng nhập mô tả sự cố"));
+        }
+        if (description.trim().length() < 10) {
+            return ResponseEntity.badRequest().body(
+                    java.util.Map.of("error", "Mô tả phải có ít nhất 10 ký tự"));
+        }
+
         var user = userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         var room = roomRepository.findById(roomId)
@@ -66,12 +80,13 @@ public class MaintenanceController {
                 .stream()
                 .anyMatch(contract -> contract.getRoom() != null && contract.getRoom().getId().equals(roomId));
         if (!isTenantRoom) {
-            throw new RuntimeException("Bạn không có hợp đồng hiệu lực với phòng này");
+            return ResponseEntity.status(403).body(
+                    java.util.Map.of("error", "Bạn không có hợp đồng hiệu lực với phòng này"));
         }
         MaintenanceRequest req = MaintenanceRequest.builder()
                 .tenant(user)
                 .room(room)
-                .description(description)
+                .description(description.trim())
                 .status(IssueStatus.PENDING)
                 .build();
         return ResponseEntity.ok(issueRepository.save(req));

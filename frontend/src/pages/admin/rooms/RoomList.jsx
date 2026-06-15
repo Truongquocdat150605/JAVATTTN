@@ -15,34 +15,71 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Tooltip,
+  TextField,
+  InputAdornment,
+  Tabs,
+  Tab,
+  Menu,
+  MenuItem,
+  Badge,
 } from "@mui/material";
-import { Add, Delete, Edit, MeetingRoom } from "@mui/icons-material";
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  MeetingRoom as MeetingRoomIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  FilterList as FilterIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Construction as MaintenanceIcon,
+  MoreVert as MoreVertIcon,
+  Image as ImageIcon,
+} from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
-import { formatCurrency } from "../../../utils/formatUtils";
+import { formatVND } from "../../../utils/formatVND";
 
 const IMAGE_BASE_URL = "http://localhost:8082/uploads/";
 
+const STATUS_CONFIG = {
+  AVAILABLE: { label: "Trống", color: "#10b981", bgColor: "#d1fae5", icon: <CheckCircleIcon /> },
+  OCCUPIED: { label: "Đã thuê", color: "#ef4444", bgColor: "#fee2e2", icon: <CancelIcon /> },
+  RENTED: { label: "Đã thuê", color: "#ef4444", bgColor: "#fee2e2", icon: <CancelIcon /> },
+  MAINTENANCE: { label: "Bảo trì", color: "#f59e0b", bgColor: "#fef3c7", icon: <MaintenanceIcon /> },
+};
+
 const getStatusChip = (status) => {
-  const value = String(status || "").toUpperCase();
-
-  if (value === "AVAILABLE") {
-    return <Chip label="Trống" color="success" size="small" />;
-  }
-  if (value === "OCCUPIED" || value === "RENTED") {
-    return <Chip label="Đã thuê" color="error" size="small" />;
-  }
-  if (value === "MAINTENANCE") {
-    return <Chip label="Bảo trì" color="warning" size="small" />;
-  }
-
-  return <Chip label={status || "-"} size="small" />;
+  const config = STATUS_CONFIG[status?.toUpperCase()] || STATUS_CONFIG.AVAILABLE;
+  return (
+    <Chip
+      icon={config.icon}
+      label={config.label}
+      size="small"
+      sx={{
+        bgcolor: config.bgColor,
+        color: config.color,
+        fontWeight: 600,
+        "& .MuiChip-icon": { color: config.color },
+      }}
+    />
+  );
 };
 
 const RoomList = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [tabValue, setTabValue] = useState(0);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
   const navigate = useNavigate();
 
   const fetchRooms = async () => {
@@ -61,8 +98,8 @@ const RoomList = () => {
     fetchRooms();
   }, []);
 
-  const handleDelete = async (roomId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa phòng này?")) return;
+  const handleDelete = async (roomId, roomNumber) => {
+    if (!window.confirm(`Bạn có chắc muốn xóa phòng ${roomNumber}?`)) return;
 
     try {
       await api.delete(`/rooms/${roomId}`);
@@ -74,88 +111,255 @@ const RoomList = () => {
     }
   };
 
+  const handleMenuOpen = (event, room) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedRoom(room);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedRoom(null);
+  };
+
+  // Filter rooms
+  const filteredRooms = rooms.filter((room) => {
+    const matchSearch =
+      !searchKeyword ||
+      room.roomNumber?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+      room.type?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+      room.description?.toLowerCase().includes(searchKeyword.toLowerCase());
+
+    if (tabValue === 0) return matchSearch;
+    if (tabValue === 1) return matchSearch && room.status === "AVAILABLE";
+    if (tabValue === 2) return matchSearch && (room.status === "OCCUPIED" || room.status === "RENTED");
+    if (tabValue === 3) return matchSearch && room.status === "MAINTENANCE";
+    return matchSearch;
+  });
+
+  const stats = {
+    total: rooms.length,
+    available: rooms.filter((r) => r.status === "AVAILABLE").length,
+    occupied: rooms.filter((r) => r.status === "OCCUPIED" || r.status === "RENTED").length,
+    maintenance: rooms.filter((r) => r.status === "MAINTENANCE").length,
+  };
+
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, display: "flex", alignItems: "center", gap: 1 }}>
-          <MeetingRoom color="primary" />
-          Quản lý phòng
-        </Typography>
+    <Box sx={{ bgcolor: "#f8fafc", minHeight: "100vh", py: 4 }}>
+      <Container maxWidth="xl">
+        {/* Header */}
+        <Paper
+          sx={{
+            p: 4,
+            mb: 4,
+            borderRadius: 4,
+            background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)",
+            color: "white",
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <MeetingRoomIcon sx={{ fontSize: 48 }} />
+              <Box>
+                <Typography variant="h4" fontWeight={800}>
+                  Quản Lý Phòng Trọ
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  Quản lý thông tin, trạng thái và hình ảnh các phòng trọ
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Tooltip title="Làm mới">
+                <IconButton onClick={fetchRooms} sx={{ bgcolor: "rgba(255,255,255,0.2)", color: "white" }}>
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => navigate("/admin/rooms/add")}
+                sx={{ bgcolor: "rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.3)" } }}
+              >
+                Thêm phòng mới
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
 
-        <Button variant="contained" startIcon={<Add />} onClick={() => navigate("/admin/rooms/add")}>
-          Thêm phòng
-        </Button>
-      </Stack>
+        {/* Stats Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={6} sm={3}>
+            <Card sx={{ borderRadius: 3, textAlign: "center", p: 2 }}>
+              <Typography variant="h4" fontWeight={900} color="#0f766e">
+                {stats.total}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">Tổng phòng</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card sx={{ borderRadius: 3, textAlign: "center", p: 2, bgcolor: "#d1fae5" }}>
+              <Typography variant="h4" fontWeight={900} color="#10b981">
+                {stats.available}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">Phòng trống</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card sx={{ borderRadius: 3, textAlign: "center", p: 2, bgcolor: "#fee2e2" }}>
+              <Typography variant="h4" fontWeight={900} color="#ef4444">
+                {stats.occupied}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">Đã cho thuê</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card sx={{ borderRadius: 3, textAlign: "center", p: 2, bgcolor: "#fef3c7" }}>
+              <Typography variant="h4" fontWeight={900} color="#f59e0b">
+                {stats.maintenance}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">Đang bảo trì</Typography>
+            </Card>
+          </Grid>
+        </Grid>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: "primary.main" }}>
-              <TableCell sx={{ color: "white", fontWeight: 700 }}>Ảnh</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: 700 }}>Số phòng</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: 700 }}>Loại phòng</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: 700 }}>Giá thuê</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: 700 }}>Trạng thái</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: 700 }}>Mô tả</TableCell>
-              <TableCell align="right" sx={{ color: "white", fontWeight: 700 }}>
-                Thao tác
-              </TableCell>
-            </TableRow>
-          </TableHead>
+        {/* Search and Filters */}
+        <Paper sx={{ p: 3, mb: 4, borderRadius: 4 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="🔍 Tìm kiếm theo số phòng, loại phòng..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "#94a3b8" }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={8}>
+              <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ minHeight: 36 }}>
+                <Tab label="Tất cả" sx={{ minHeight: 36 }} />
+                <Tab label="Phòng trống" sx={{ minHeight: 36 }} />
+                <Tab label="Đã cho thuê" sx={{ minHeight: 36 }} />
+                <Tab label="Bảo trì" sx={{ minHeight: 36 }} />
+              </Tabs>
+            </Grid>
+          </Grid>
+        </Paper>
 
-          <TableBody>
-            {loading && (
-              <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
-                  <CircularProgress />
-                </TableCell>
+        {/* Rooms Table */}
+        <TableContainer component={Paper} sx={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: "#0f766e" }}>
+                <TableCell sx={{ color: "white", fontWeight: 700 }}>Hình ảnh</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 700 }}>Số phòng</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 700 }}>Loại phòng</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 700 }}>Diện tích</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 700 }}>Giá thuê</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 700 }}>Trạng thái</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 700 }}>Mô tả</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 700 }} align="center">Thao tác</TableCell>
               </TableRow>
-            )}
-
-            {!loading &&
-              rooms.map((room) => (
-                <TableRow key={room.id} hover>
-                  <TableCell>
-                    <Avatar
-                      variant="rounded"
-                      src={room.image ? `${IMAGE_BASE_URL}${room.image}` : ""}
-                      alt={`Phòng ${room.roomNumber || ""}`}
-                      sx={{ width: 64, height: 48 }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>{room.roomNumber}</TableCell>
-                  <TableCell>{room.type}</TableCell>
-                  <TableCell>{room.area} m²</TableCell>
-                  <TableCell>{formatCurrency(room.price)}</TableCell>
-                  <TableCell>{getStatusChip(room.status)}</TableCell>
-                  <TableCell sx={{ maxWidth: 320 }}>
-                    <Typography variant="body2" noWrap title={room.description || ""}>
-                      {room.description || "-"}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton color="primary" onClick={() => navigate(`/admin/rooms/edit/${room.id}`)}>
-                      <Edit />
-                    </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(room.id)}>
-                      <Delete />
-                    </IconButton>
+            </TableHead>
+            <TableBody>
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 5 }}>
+                    <CircularProgress />
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
 
-            {!loading && rooms.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
-                  Chưa có phòng
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
+              {!loading && filteredRooms.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                    <MeetingRoomIcon sx={{ fontSize: 48, color: "#cbd5e1", mb: 1 }} />
+                    <Typography color="text.secondary">Không tìm thấy phòng nào</Typography>
+                    <Button variant="text" startIcon={<AddIcon />} onClick={() => navigate("/admin/rooms/add")} sx={{ mt: 1 }}>
+                      Thêm phòng mới
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!loading &&
+                filteredRooms.map((room) => (
+                  <TableRow key={room.id} hover>
+                    <TableCell>
+                      <Avatar
+                        variant="rounded"
+                        src={room.image ? `${IMAGE_BASE_URL}${room.image}` : ""}
+                        sx={{ width: 70, height: 52, borderRadius: 2 }}
+                      >
+                        {!room.image && <ImageIcon sx={{ fontSize: 24, color: "#94a3b8" }} />}
+                      </Avatar>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        Phòng {room.roomNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{room.type || "—"}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        {room.area} m²
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography sx={{ fontWeight: 700, color: "#0f766e" }}>{formatVND(room.price)}</Typography>
+                    </TableCell>
+                    <TableCell>{getStatusChip(room.status)}</TableCell>
+                    <TableCell>
+                      <Tooltip title={room.description || "Chưa có mô tả"}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            maxWidth: 250,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            color: room.description ? "inherit" : "#94a3b8",
+                          }}
+                        >
+                          {room.description || "—"}
+                        </Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={0.5} justifyContent="center">
+                        <Tooltip title="Chỉnh sửa">
+                          <IconButton size="small" color="primary" onClick={() => navigate(`/admin/rooms/edit/${room.id}`)}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Xóa">
+                          <IconButton size="small" color="error" onClick={() => handleDelete(room.id, room.roomNumber)}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
+    </Box>
   );
 };
+
+// Card component wrapper
+const CardWrapper = ({ children, sx }) => (
+  <Paper elevation={0} sx={{ p: 2, borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", ...sx }}>
+    {children}
+  </Paper>
+);
 
 export default RoomList;

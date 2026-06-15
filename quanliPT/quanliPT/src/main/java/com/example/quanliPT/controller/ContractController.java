@@ -7,6 +7,9 @@ import com.example.quanliPT.repository.ContractRepository;
 import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import com.example.quanliPT.service.ContractBusinessService;
+import com.example.quanliPT.service.ContractNotificationService;
+import com.example.quanliPT.dto.ContractChangeNotificationDTO;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,8 @@ public class ContractController {
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
     private final ContractBusinessService contractBusinessService;
+    private final ContractNotificationService contractNotificationService;
+
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -70,7 +75,16 @@ public class ContractController {
             roomRepository.save(saved.getRoom());
         }
         log.info("Contract created id={}", saved.getId());
+        ContractChangeNotificationDTO dto = ContractChangeNotificationDTO.builder()
+                .type(ContractChangeNotificationDTO.Type.CREATE)
+                .contractId(saved.getId())
+                .tenantId(saved.getTenant() != null ? saved.getTenant().getId() : null)
+                .message("Hợp đồng đã được tạo")
+                .updatedAt(saved.getLastModifiedDate() != null ? saved.getLastModifiedDate() : null)
+                .build();
+        contractNotificationService.notifyContractChanged(dto);
         return ResponseEntity.ok(saved);
+
     }
 
     @PostMapping("/create-with-tenant")
@@ -99,7 +113,16 @@ public class ContractController {
                 deposit
         );
         log.info("Contract created with id={} via createContractWithTenant", contract.getId());
+        ContractChangeNotificationDTO dto = ContractChangeNotificationDTO.builder()
+                .type(ContractChangeNotificationDTO.Type.CREATE)
+                .contractId(contract.getId())
+                .tenantId(contract.getTenant() != null ? contract.getTenant().getId() : null)
+                .message("Hợp đồng đã được tạo")
+                .updatedAt(contract.getLastModifiedDate() != null ? contract.getLastModifiedDate() : null)
+                .build();
+        contractNotificationService.notifyContractChanged(dto);
         return ResponseEntity.ok(contract);
+
     }
 
     @PutMapping("/{id}")
@@ -140,15 +163,37 @@ public class ContractController {
         }
 
         log.info("Contract id={} updated successfully", saved.getId());
+        ContractChangeNotificationDTO dto = ContractChangeNotificationDTO.builder()
+                .type(ContractChangeNotificationDTO.Type.UPDATE)
+                .contractId(saved.getId())
+                .tenantId(saved.getTenant() != null ? saved.getTenant().getId() : null)
+                .message("Hợp đồng đã được cập nhật")
+                .updatedAt(saved.getLastModifiedDate() != null ? saved.getLastModifiedDate() : null)
+                .build();
+        contractNotificationService.notifyContractChanged(dto);
         return ResponseEntity.ok(saved);
+
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
         log.info("Entering deleteContract for contract id={}", id);
+        Contract contract = contractRepository.findById(id).orElseThrow(() -> {
+            log.error("Contract not found with id={}", id);
+            return new RuntimeException("Contract not found");
+        });
         contractRepository.deleteById(id);
         log.info("Contract id={} deleted", id);
+        ContractChangeNotificationDTO dto = ContractChangeNotificationDTO.builder()
+                .type(ContractChangeNotificationDTO.Type.DELETE)
+                .contractId(id)
+                .tenantId(contract.getTenant() != null ? contract.getTenant().getId() : null)
+                .message("Hợp đồng đã bị xóa")
+                .updatedAt(contract.getLastModifiedDate() != null ? contract.getLastModifiedDate() : null)
+                .build();
+        contractNotificationService.notifyContractChanged(dto);
         return ResponseEntity.noContent().build();
+
     }
 }

@@ -12,7 +12,7 @@ import {
   Home,
 } from "lucide-react";
 import AuthService from "../../services/AuthService";
-
+import { toast } from 'react-toastify';
 /* ─────────────────────── Inline styles ─────────────────────── */
 const styles = {
   page: {
@@ -406,28 +406,34 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+// Xóa hàm handleSubmit cũ, giữ lại hàm này:
+
+const onSubmitRegister = async (e) => {
     e.preventDefault();
     setErrorMsg("");
     if (!canSubmit) {
-      setErrorMsg("Vui lòng kiểm tra lại thông tin và chấp nhận điều khoản.");
-      return;
+        setErrorMsg("Vui lòng kiểm tra lại thông tin và chấp nhận điều khoản.");
+        return;
     }
     try {
-      setLoading(true);
-      await AuthService.register({
-        username: form.username,
-        fullName: form.fullName,
-        email: form.email,
-        password: form.password,
-      });
-      navigate("/login");
-    } catch {
-      setErrorMsg("Đăng ký thất bại. Email có thể đã được sử dụng.");
+        setLoading(true);
+        await AuthService.register({
+            username: form.username,
+            fullName: form.fullName,
+            email: form.email,
+            password: form.password,
+            role: "TENANT" // Mặc định tạo tenant
+        });
+        toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+        navigate("/login");
+    } catch (err) {
+        const message = err.response?.data?.message || "Đăng ký thất bại. Email hoặc username đã được sử dụng.";
+        setErrorMsg(message);
+        toast.error(message);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <>
@@ -492,7 +498,7 @@ const Register = () => {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} style={styles.form}>
+<form onSubmit={onSubmitRegister} style={styles.form}>
               {/* Username */}
               <div style={styles.fieldGroup}>
                 <label style={styles.label} htmlFor="reg_username">Tên đăng nhập</label>

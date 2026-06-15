@@ -14,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,10 +33,13 @@ public class RoomController {
 
     private final RoomRepository roomRepository;
     private final ContractRepository contractRepository;
+    private final com.example.quanliPT.service.RoomService roomService;
+
 
     private final String UPLOAD_DIR = "uploads/";
 
     @GetMapping
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Room> getAllRooms() {
         log.info("Entering getAllRooms");
         List<Room> rooms = roomRepository.findAll();
@@ -42,7 +47,9 @@ public class RoomController {
         return rooms;
     }
 
+    @Cacheable(value = "roomsAvailable")
     @GetMapping("/available")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Room> getAvailableRooms() {
         log.info("Entering getAvailableRooms");
         List<Room> rooms = roomRepository.findByStatus(RoomStatus.AVAILABLE);
@@ -50,7 +57,30 @@ public class RoomController {
         return rooms;
     }
 
+    @Cacheable(value = "roomsHot", key = "'top4'")
+    @GetMapping("/hot")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Room> getHotRooms() {
+        log.info("Entering getHotRooms");
+        List<Room> rooms = roomService.getHotRooms();
+        log.info("Returning {} hot rooms", rooms.size());
+        return rooms;
+    }
+
+    @Cacheable(value = "roomsPromo", key = "'top4'")
+    @GetMapping("/promo")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Room> getPromoRooms() {
+        log.info("Entering getPromoRooms");
+        List<Room> rooms = roomService.getPromoRooms();
+        log.info("Returning {} promo rooms", rooms.size());
+        return rooms;
+    }
+
+
+    @Cacheable(value = "roomsById", key = "#id")
     @GetMapping("/{id}")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
         log.info("Entering getRoomById with id={}", id);
         return roomRepository.findById(id)
@@ -66,6 +96,7 @@ public class RoomController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = {"roomsAvailable", "roomsById"}, allEntries = true)
     public ResponseEntity<?> createRoom(
             @RequestParam("roomNumber") String roomNumber,
             @RequestParam("type") String type,
@@ -76,7 +107,7 @@ public class RoomController {
     ) {
         log.info("Entering createRoom with roomNumber={}, type={}", roomNumber, type);
         try {
-            if (roomNumber == null || roomNumber.isEmpty()) {
+            if (roomNumber == null || roomNumber.trim().isEmpty()) {
                 log.warn("roomNumber is empty");
                 return ResponseEntity.badRequest().body(Map.of("error", "Số phòng không được để trống"));
             }
@@ -89,6 +120,11 @@ public class RoomController {
             } catch (Exception e) {
                 log.warn("Invalid price value: {}", priceStr);
             }
+
+            if (price.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Giá thuê phải lớn hơn 0"));
+            }
+
 
             double area = 0;
             try {
@@ -130,6 +166,7 @@ public class RoomController {
 
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = {"roomsAvailable", "roomsById"}, allEntries = true)
     public ResponseEntity<?> updateRoom(
             @PathVariable Long id,
             @RequestParam("roomNumber") String roomNumber,
@@ -188,6 +225,7 @@ public class RoomController {
 
     @PutMapping(value = "/{id}/image")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = {"roomsAvailable", "roomsById"}, allEntries = true)
     public ResponseEntity<?> updateRoomImage(
             @PathVariable Long id,
             @RequestParam("image") MultipartFile imageFile
@@ -218,6 +256,7 @@ public class RoomController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = {"roomsAvailable", "roomsById"}, allEntries = true)
     public ResponseEntity<?> deleteRoom(@PathVariable Long id) {
         log.info("Entering deleteRoom with id={}", id);
         try {

@@ -11,6 +11,7 @@ import com.example.quanliPT.repository.RoomRepository;
 import com.example.quanliPT.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class ContractBusinessService {
     private final BillingService billingService;
 
     @Transactional
+    @CacheEvict(value = {"roomsAvailable", "roomsById"}, allEntries = true)
     public Contract createContractAndTenant(
             Long roomId,
             String tenantFullName,
@@ -56,11 +58,11 @@ public class ContractBusinessService {
         // 2. Tìm hoặc tạo User
         String loginIdentifier = tenantPhone;
         log.debug("Looking up user by phone={}", loginIdentifier);
-        Optional<User> existingUser = userRepository.findByPhone(loginIdentifier);
+        java.util.List<User> usersByPhone = userRepository.findByPhone(loginIdentifier);
 
         User tenant;
-        if (existingUser.isPresent()) {
-            tenant = existingUser.get();
+        if (!usersByPhone.isEmpty()) {
+            tenant = usersByPhone.get(0); // Lấy user đầu tiên nếu có nhiều
             log.debug("Existing user found: id={}, username={}", tenant.getId(), tenant.getUsername());
             // Cập nhật thông tin nếu cần
             if (tenantEmail != null) tenant.setEmail(tenantEmail);

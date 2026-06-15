@@ -10,6 +10,7 @@ import com.example.quanliPT.repository.RoomRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +21,7 @@ public class PublicController {
     private final RoomRepository roomRepository;
     private final RentalRequestRepository rentalRequestRepository;
     private final ContactMessageRepository contactMessageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/rental-requests")
     public ResponseEntity<RentalRequest> createRentalRequest(@Valid @RequestBody PublicRentalRequestDto request) {
@@ -35,7 +37,12 @@ public class PublicController {
                 .note(request.getNote())
                 .build();
 
-        return ResponseEntity.ok(rentalRequestRepository.save(rentalRequest));
+        RentalRequest saved = rentalRequestRepository.save(rentalRequest);
+        
+        // Gửi thông báo realtime qua WebSocket đến admin
+        messagingTemplate.convertAndSend("/topic/rental-requests", saved);
+        
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/contacts")

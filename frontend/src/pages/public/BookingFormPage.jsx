@@ -5,173 +5,158 @@ import { toast } from "react-toastify";
 import {
   Container, Box, Typography, Card, CardContent, TextField, Button, Grid, Divider, CircularProgress, Alert
 } from "@mui/material";
-import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
-import SendIcon from '@mui/icons-material/Send';
-import CancelIcon from '@mui/icons-material/Cancel';
+import { MeetingRoom as RoomIcon, Send as SendIcon, Cancel as CancelIcon, CheckCircle as CheckIcon } from '@mui/icons-material';
 
 const BookingFormPage = () => {
-  const location = useLocation();
+  const { state } = useLocation();
   const navigate = useNavigate();
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [loadingRoom, setLoadingRoom] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rentalForm, setRentalForm] = useState({
-    fullName: "",
-    phone: "",
-    identityNumber: "",
-    desiredMoveInDate: "",
-    note: "",
-  });
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [form, setForm] = useState({ fullName: "", phone: "", identityNumber: "", desiredMoveInDate: "", note: "" });
 
   useEffect(() => {
-    const roomId = location.state?.roomId;
-    if (roomId) {
-      api.get(`/rooms/${roomId}`)
-        .then((res) => {
-          setSelectedRoom(res.data || res);
-        })
-        .catch((error) => {
-          toast.error("Không tìm thấy thông tin phòng.");
-          navigate("/rooms");
-        })
-        .finally(() => setLoadingRoom(false));
-    } else {
+    if (!state?.roomId) {
       toast.error("Không có phòng nào được chọn.");
-      navigate("/rooms");
+      return navigate("/rooms");
     }
-  }, [location.state?.roomId, navigate]);
+    api.get(`/rooms/${state.roomId}`).then(res => setSelectedRoom(res.data || res))
+      .catch(() => {
+        toast.error("Không tìm thấy thông tin phòng.");
+        navigate("/rooms");
+      })
+      .finally(() => setLoading(false));
+  }, [state?.roomId, navigate]);
 
-  const submitRental = async (e) => {
+  const validateField = (name, value) => {
+    let error = "";
+    switch (name) {
+      case "fullName":
+        if (!value.trim() || value.length < 3) error = "Họ tên tối thiểu 3 ký tự";
+        break;
+      case "phone":
+        if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(value)) error = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 03/05/07/08/09)";
+        break;
+      case "identityNumber":
+        if (value && !/^\d{12}$/.test(value)) error = "CCCD phải đúng 12 số";
+        break;
+      case "desiredMoveInDate":
+        if (!value || new Date(value) < new Date().setHours(0,0,0,0)) error = "Ngày chuyển vào không hợp lệ (phải từ hôm nay trở đi)";
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const error = validateField(field, form[field]);
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const handleChange = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }
+  };
+
+  const validateAll = () => {
+    const newErrors = {};
+    Object.keys(form).forEach(key => {
+      const error = validateField(key, form[key]);
+      if (error) newErrors[key] = error;
+    });
+    setErrors(newErrors);
+    setTouched({
+      fullName: true, phone: true, identityNumber: true, desiredMoveInDate: true
+    });
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedRoom) {
-      toast.error("Vui lòng chọn phòng trước khi gửi yêu cầu.");
+    if (!validateAll()) {
+      toast.error("Vui lòng kiểm tra lại thông tin trên form.");
       return;
     }
     setIsSubmitting(true);
     try {
-      await api.post("/public/rental-requests", { ...rentalForm, roomId: selectedRoom.id });
-      toast.success("Đã gửi yêu cầu thuê phòng, admin sẽ liên hệ sớm.");
-      setRentalForm({ fullName: "", phone: "", identityNumber: "", desiredMoveInDate: "", note: "" });
-      navigate("/rooms");
-    } catch (error) {
-      toast.error("Gửi yêu cầu thất bại. Vui lòng kiểm tra lại thông tin.");
-      console.error("Error submitting rental request:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+      await api.post("/public/rental-requests", { ...form, roomId: selectedRoom.id });
+      toast.success(`Đã gửi yêu cầu thuê phòng ${selectedRoom.roomNumber}!`);
+      setTimeout(() => navigate("/rooms"), 1500);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Gửi yêu cầu thất bại.");
+    } finally { setIsSubmitting(false); }
   };
 
-  if (loadingRoom) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  if (loading) return <Box display="flex" justifyContent="center" py={10}><CircularProgress /></Box>;
 
-  if (!selectedRoom) return null;
+  const fields = [
+    { n: "fullName", l: "Họ và tên *", xs: 12 },
+    { n: "phone", l: "Số điện thoại *", xs: 6 },
+    { n: "identityNumber", l: "CCCD (12 số)", xs: 6 },
+    { n: "desiredMoveInDate", l: "Ngày muốn chuyển vào *", t: "date", xs: 12 },
+    { n: "note", l: "Ghi chú thêm", m: true, r: 4, xs: 12 }
+  ];
 
   return (
-    <Box sx={{ py: 8, backgroundColor: "#f8fafc", minHeight: "100vh" }}>
+    <Box sx={{ py: 8, bgcolor: "#f8fafc", minHeight: "100vh" }}>
       <Container maxWidth="md">
-        <Card sx={{ 
-          borderRadius: 4, 
-          boxShadow: "0 20px 40px rgba(15,23,42,0.08)", 
-          overflow: "hidden" 
-        }}>
-          <Box sx={{ bgcolor: "primary.main", color: "white", p: 4, textAlign: "center" }}>
-            <MeetingRoomIcon sx={{ fontSize: 48, mb: 1, opacity: 0.9 }} />
-            <Typography variant="h4" fontWeight={800} gutterBottom>
-              Đăng Ký Thuê Phòng {selectedRoom.roomNumber}
-            </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
-              Vui lòng điền đầy đủ thông tin để gửi yêu cầu thuê phòng. Chúng tôi sẽ liên hệ lại ngay!
-            </Typography>
+        <Card sx={{ borderRadius: 4, boxShadow: "0 10px 30px rgba(15,23,42,0.1)", border: "1px solid #e2e8f0" }}>
+          <Box sx={{ background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)", color: "white", p: 4, textAlign: "center" }}>
+            <RoomIcon sx={{ fontSize: 48, mb: 1 }} />
+            <Typography variant="h4" fontWeight={800}>Đăng Ký Thuê Phòng {selectedRoom?.roomNumber}</Typography>
+            <Alert icon={<CheckIcon />} severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.2)", color: "white", border: "none", ".MuiAlert-icon": { color: "white" } }}>
+              {new Intl.NumberFormat('vi-VN').format(selectedRoom?.price)}đ/tháng | {selectedRoom?.area}m²
+            </Alert>
           </Box>
-          
-          <CardContent sx={{ p: { xs: 3, md: 5 } }}>
-            <form onSubmit={submitRental}>
+          <CardContent sx={{ p: 4 }}>
+            <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Họ và tên"
-                    variant="outlined"
-                    required
-                    value={rentalForm.fullName}
-                    onChange={(e) => setRentalForm({ ...rentalForm, fullName: e.target.value })}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Số điện thoại"
-                    variant="outlined"
-                    required
-                    value={rentalForm.phone}
-                    onChange={(e) => setRentalForm({ ...rentalForm, phone: e.target.value })}
-                  />
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Căn cước công dân (CCCD)"
-                    variant="outlined"
-                    value={rentalForm.identityNumber}
-                    onChange={(e) => setRentalForm({ ...rentalForm, identityNumber: e.target.value })}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Ngày muốn chuyển vào"
-                    type="date"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
-                    required
-                    value={rentalForm.desiredMoveInDate}
-                    onChange={(e) => setRentalForm({ ...rentalForm, desiredMoveInDate: e.target.value })}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Ghi chú thêm"
-                    variant="outlined"
-                    multiline
-                    rows={4}
-                    value={rentalForm.note}
-                    onChange={(e) => setRentalForm({ ...rentalForm, note: e.target.value })}
-                    placeholder="Bạn có yêu cầu đặc biệt nào không?"
-                  />
-                </Grid>
+                {fields.map(f => (
+                  <Grid item xs={f.xs} key={f.n}>
+                    <TextField 
+                      fullWidth 
+                      label={f.l} 
+                      type={f.t || "text"} 
+                      multiline={f.m} 
+                      rows={f.r}
+                      variant="outlined" 
+                      value={form[f.n]} 
+                      error={!!errors[f.n]} 
+                      helperText={errors[f.n]}
+                      InputLabelProps={f.t === 'date' ? { shrink: true } : {}}
+                      onBlur={() => handleBlur(f.n)}
+                      onChange={e => handleChange(f.n, e.target.value)} 
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': { borderColor: '#0f766e' },
+                          '&.Mui-focused fieldset': { borderColor: '#0f766e' },
+                        }
+                      }}
+                    />
+                  </Grid>
+                ))}
               </Grid>
-
               <Divider sx={{ my: 4 }} />
-
               <Box display="flex" justifyContent="flex-end" gap={2}>
-                <Button 
-                  variant="outlined" 
-                  color="inherit" 
-                  onClick={() => navigate("/rooms")}
-                  startIcon={<CancelIcon />}
-                  sx={{ px: 3, py: 1.5, borderRadius: 2 }}
-                >
-                  Hủy Bỏ
-                </Button>
-                <Button 
-                  type="submit" 
-                  variant="contained" 
-                  color="primary"
-                  disabled={isSubmitting}
-                  startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-                  sx={{ px: 4, py: 1.5, borderRadius: 2, fontWeight: 'bold' }}
-                >
-                  Gửi Yêu Cầu
+                <Button variant="outlined" color="inherit" onClick={() => navigate("/rooms")} startIcon={<CancelIcon />} sx={{ borderRadius: 2, fontWeight: 600 }}>Hủy</Button>
+                <Button type="submit" variant="contained" disabled={isSubmitting} startIcon={<SendIcon />} 
+                  sx={{ 
+                    bgcolor: "#0f766e", 
+                    borderRadius: 2, 
+                    fontWeight: 700,
+                    px: 4,
+                    '&:hover': { bgcolor: "#0d9488", transform: "translateY(-2px)" },
+                    transition: "all 0.2s"
+                  }}>
+                  {isSubmitting ? "Đang gửi..." : "Gửi Yêu Cầu"}
                 </Button>
               </Box>
             </form>

@@ -9,10 +9,14 @@ const api = axios.create({
 // Attach JWT token cho cấu trúc Stateless
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    const isAuthRequest = String(config.url || '').startsWith('/auth/');
+    const token = sessionStorage.getItem('token');
+    const url = String(config.url || '');
+    const method = String(config.method || 'get').toLowerCase();
+    const isAuthenticatedAuthRequest = url === '/auth/change-password';
+    const isAuthRequest = url.startsWith('/auth/') && !isAuthenticatedAuthRequest;
     // Các request công khai không yêu cầu token
-    const isPublicRequest = String(config.url || '').startsWith('/public/') || String(config.url || '').startsWith('/rooms/');
+    const isPublicRoomsRequest = method === 'get' && (url === '/rooms' || url.startsWith('/rooms/'));
+    const isPublicRequest = url.startsWith('/public/') || isPublicRoomsRequest;
 
     if (token && !isAuthRequest && !isPublicRequest) { // Thêm !isPublicRequest vào điều kiện gửi token
       // đảm bảo headers tồn tại
@@ -30,12 +34,15 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     const isLoginRequest = String(error.config?.url || '').includes('/auth/login');
+    const url = String(error.config?.url || '');
+    const method = String(error.config?.method || 'get').toLowerCase();
     // Các request công khai không nên bị điều hướng về login khi 401
-    const isPublicRequest = String(error.config?.url || '').startsWith('/public/') || String(error.config?.url || '').startsWith('/rooms/');
+    const isPublicRoomsRequest = method === 'get' && (url === '/rooms' || url.startsWith('/rooms/'));
+    const isPublicRequest = url.startsWith('/public/') || isPublicRoomsRequest;
 
     if (status === 401) {
       if (!isLoginRequest && !isPublicRequest) { // Thêm !isPublicRequest vào điều kiện điều hướng
-        localStorage.clear();
+        sessionStorage.clear();
         toast.error('Phiên đăng nhập hết hạn');
         window.location.href = '/login';
       }

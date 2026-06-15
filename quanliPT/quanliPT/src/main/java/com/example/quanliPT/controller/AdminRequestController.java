@@ -74,8 +74,19 @@ public class AdminRequestController {
             @RequestParam BigDecimal deposit
     ) {
         log.info("Entering approveAndCreateContract with id={}, startDate={}, endDate={}", id, startDate, endDate);
+        if (startDate == null) {
+            throw new IllegalArgumentException("startDate không được để trống");
+        }
         RentalRequest request = rentalRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rental request not found"));
+
+
+        // Kiểm tra trạng thái: Chỉ duyệt khi còn PENDING
+        if (request.getStatus() != RentalRequestStatus.PENDING) {
+            log.warn("Rental request id={} already processed with status={}", id, request.getStatus());
+            return ResponseEntity.badRequest().body(null);
+        }
+
         var room = request.getRoom();
         if (room == null) {
             log.error("Rental request id={} has no room associated", id);

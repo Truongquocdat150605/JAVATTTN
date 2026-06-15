@@ -24,15 +24,29 @@ public class Invoice {
     private BigDecimal rentalAmount;
     
     // Electricity
+    @Column(name = "electricity_start")
     private Double electricityStart;
+
+    @Column(name = "electricity_end")
     private Double electricityEnd;
+
+    @Column(name = "electricity_price")
     private BigDecimal electricityPrice;
+
+    @Column(name = "electricity_amount")
     private BigDecimal electricityAmount;
-    
+
     // Water
+    @Column(name = "water_start")
     private Double waterStart;
+
+    @Column(name = "water_end")
     private Double waterEnd;
+
+    @Column(name = "water_price")
     private BigDecimal waterPrice;
+
+    @Column(name = "water_amount")
     private BigDecimal waterAmount;
     
     private BigDecimal serviceAmount; // Wifi, Cleaning, etc.

@@ -32,16 +32,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        // Cho phép PayOS Webhook gọi về không cần JWT
+                        .requestMatchers(HttpMethod.POST, "/api/payments/payos/callback").permitAll()
                         // Cho phép truy cập công khai vào API đăng ký thuê phòng (POST)
                         .requestMatchers(HttpMethod.POST, "/api/public/rental-requests").permitAll()
                         // Cho phép truy cập công khai vào các API phòng (GET)
                         .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
                         // Cho phép truy cập công khai vào các API khác trong /api/public/
                         .requestMatchers("/api/public/**").permitAll()
-                        // Cho phép truy cập công khai vào các API auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // Cho phép truy cập vào các file upload
-                        .requestMatchers("/uploads/**").permitAll()
+                        // Swagger UI
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         
                         // Admin-only management
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

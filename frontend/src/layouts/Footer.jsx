@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   Box,
   Container,
@@ -65,16 +66,16 @@ const Footer = () => {
               Liên kết nhanh
             </Typography>
             <Stack spacing={1}>
-              <Typography variant="body2" component="a" href="/" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
+              <Typography variant="body2" component={Link} to="/" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
                 Trang chủ
               </Typography>
-              <Typography variant="body2" component="a" href="/rooms" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
+              <Typography variant="body2" component={Link} to="/rooms" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
                 Danh sách phòng
               </Typography>
-              <Typography variant="body2" component="a" href="/contact" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
+              <Typography variant="body2" component={Link} to="/contact" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
                 Liên hệ
               </Typography>
-              <Typography variant="body2" component="a" href="/about" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
+              <Typography variant="body2" component={Link} to="/about" sx={{ color: "#e2e8f0", textDecoration: "none", "&:hover": { color: "#0f766e" } }}>
                 Giới thiệu
               </Typography>
             </Stack>
@@ -92,11 +93,11 @@ const Footer = () => {
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Email sx={{ fontSize: 20, color: "#0f766e" }} />
-                <Typography variant="body2">dattruongquoc78@gmail.com</Typography>
+                <Typography variant="body2">contact@smartphongtro.com</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocationOn sx={{ fontSize: 20, color: "#0f766e" }} />
-                <Typography variant="body2">41 Đường số 5, Tăng Nhơn Phú B</Typography>
+                <Typography variant="body2">41 Đường số 5, Tăng Nhơn Phú B, TP. Thủ Đức, TP.HCM</Typography>
               </Box>
             </Stack>
           </Grid>

@@ -44,6 +44,23 @@ public class TenantController {
         return ResponseEntity.ok(rooms);
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<User> updateCurrentTenantProfile(
+            Authentication authentication,
+            @RequestBody User request
+    ) {
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setIdentityNumber(request.getIdentityNumber());
+        user.setAddress(request.getAddress());
+
+        return ResponseEntity.ok(userRepository.save(user));
+    }
+
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(
             Authentication authentication,

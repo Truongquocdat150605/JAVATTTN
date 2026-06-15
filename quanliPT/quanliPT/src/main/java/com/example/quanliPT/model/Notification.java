@@ -31,6 +31,10 @@ public class Notification {
     private Long targetUserId;
 
     @Builder.Default
+    @Column(name = "broadcast")
+    private boolean broadcast = false;
+
+    @Builder.Default
     @Column(name = "is_read")
     private boolean isRead = false;
 }

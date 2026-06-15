@@ -1,6 +1,6 @@
 export const getCurrentUser = () => {
   try {
-    return JSON.parse(localStorage.getItem("user") || "null");
+    return JSON.parse(sessionStorage.getItem("user") || "null");
   } catch (error) {
     return null;
   }
@@ -8,7 +8,7 @@ export const getCurrentUser = () => {
 
 export const getRole = () => {
   const user = getCurrentUser();
-  return localStorage.getItem("role") || user?.role || "";
+  return sessionStorage.getItem("role") || user?.role || "";
 };
 
 export const hasRole = (requiredRole) => {

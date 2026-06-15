@@ -1,0 +1,21 @@
+{
+  "servers": [
+    {
+      "name": "github.com/postmanlabs/postman-mcp-server",
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@postman/postman-mcp-server",
+        "--minimal"
+      ]
+    },
+    {
+      "name": "codegraph",
+      "type": "stdio",
+      "command": "codegraph",
+      "args": ["mcp"],
+      "env": {}
+    }
+  ]
+}

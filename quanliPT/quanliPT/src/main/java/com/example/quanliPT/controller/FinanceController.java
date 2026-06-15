@@ -36,4 +36,31 @@ public class FinanceController {
     public ResponseEntity<BusinessExpense> createExpense(@RequestBody BusinessExpense expense) {
         return ResponseEntity.ok(expenseRepository.save(expense));
     }
+
+    @PutMapping("/expenses/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BusinessExpense> updateExpense(
+            @PathVariable Long id,
+            @RequestBody BusinessExpense expenseDetails
+    ) {
+        BusinessExpense expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Expense not found"));
+
+        expense.setDescription(expenseDetails.getDescription());
+        expense.setAmount(expenseDetails.getAmount());
+        expense.setExpenseDate(expenseDetails.getExpenseDate());
+        expense.setCategory(expenseDetails.getCategory());
+        expense.setNotes(expenseDetails.getNotes());
+
+        return ResponseEntity.ok(expenseRepository.save(expense));
+    }
+
+    @DeleteMapping("/expenses/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
+        BusinessExpense expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Expense not found"));
+        expenseRepository.delete(expense);
+        return ResponseEntity.noContent().build();
+    }
 }

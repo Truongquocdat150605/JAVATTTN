@@ -1,6 +1,7 @@
 package com.example.quanliPT.controller;
 
 import com.example.quanliPT.model.Notification;
+import com.example.quanliPT.model.Role;
 import com.example.quanliPT.model.User;
 import com.example.quanliPT.dto.NotificationDTO;
 import com.example.quanliPT.repository.NotificationRepository;
@@ -53,11 +54,37 @@ public class NotificationController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Nội dung không được để trống"));
             }
 
+            boolean sendToAll = targetId == null || targetId.toString().isEmpty();
+            if (sendToAll) {
+                List<User> tenants = userRepository.findByRoleAndActiveTrue(Role.TENANT);
+                List<Notification> notifications = tenants.stream()
+                        .map(tenant -> Notification.builder()
+                                .title(title.trim())
+                                .content(content.trim())
+                                .targetUserId(tenant.getId())
+                                .broadcast(true)
+                                .createdAt(LocalDateTime.now())
+                                .isRead(false)
+                                .build())
+                        .collect(Collectors.toList());
+
+                notificationRepository.saveAll(notifications);
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "Đã gửi thông báo đến tất cả người thuê",
+                        "count", notifications.size()
+                ));
+            }
+
+            Long targetUserId = Long.valueOf(targetId.toString());
+            userRepository.findById(targetUserId)
+                    .orElseThrow(() -> new RuntimeException("Người nhận không tồn tại"));
+
             Notification notification = Notification.builder()
                     .title(title.trim())
                     .content(content.trim())
-                    .targetUserId(targetId != null && !targetId.toString().isEmpty()
-                            ? Long.valueOf(targetId.toString()) : null)
+                    .targetUserId(targetUserId)
+                    .broadcast(false)
                     .createdAt(LocalDateTime.now())
                     .isRead(false)
                     .build();
@@ -116,10 +143,17 @@ public class NotificationController {
     // ─── TENANT: Đánh dấu đã đọc ─────────────────────────────────────────────
     @PatchMapping("/my/{id}/read")
     @PreAuthorize("hasAnyRole('ADMIN','TENANT')")
-    public ResponseEntity<?> markAsRead(@PathVariable Long id) {
+    public ResponseEntity<?> markAsRead(
+            HttpServletRequest request,
+            @PathVariable Long id
+    ) {
         try {
+            Long userId = extractUserIdFromRequest(request);
             Notification n = notificationRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo"));
+            if (!userId.equals(n.getTargetUserId())) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Bạn không có quyền đọc thông báo này"));
+            }
             n.setRead(true);
             Notification saved = notificationRepository.save(n);
             return ResponseEntity.ok(convertToDTO(saved));
@@ -129,6 +163,45 @@ public class NotificationController {
     }
 
     // ─── Helper: Convert Entity to DTO ────────────────────────────────────────
+    @PatchMapping("/my/mark-all-read")
+    @PreAuthorize("hasAnyRole('ADMIN','TENANT')")
+    public ResponseEntity<?> markAllAsRead(HttpServletRequest request) {
+        try {
+            Long userId = extractUserIdFromRequest(request);
+            List<Notification> notifications = notificationRepository.findNotificationsForUser(userId);
+            notifications.forEach(notification -> notification.setRead(true));
+            notificationRepository.saveAll(notifications);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "count", notifications.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/my/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','TENANT')")
+    public ResponseEntity<?> deleteMyNotification(
+            HttpServletRequest request,
+            @PathVariable Long id
+    ) {
+        try {
+            Long userId = extractUserIdFromRequest(request);
+            Notification notification = notificationRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo"));
+
+            if (!userId.equals(notification.getTargetUserId())) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Bạn không có quyền xóa thông báo này"));
+            }
+
+            notificationRepository.delete(notification);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     private NotificationDTO convertToDTO(Notification notification) {
         return NotificationDTO.builder()
                 .id(notification.getId())
@@ -136,6 +209,7 @@ public class NotificationController {
                 .content(notification.getContent())
                 .createdAt(notification.getCreatedAt())
                 .targetUserId(notification.getTargetUserId())
+                .broadcast(notification.isBroadcast())
                 .isRead(notification.isRead())
                 .build();
     }
@@ -144,8 +218,21 @@ public class NotificationController {
     private Long extractUserIdFromRequest(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
+            // For some tests (MockMvc) no Authorization header is provided.
+            // Fall back to the current security principal name when possible.
+            try {
+                var auth = request.getUserPrincipal();
+                if (auth != null && auth.getName() != null && !auth.getName().isBlank()) {
+                    String username = auth.getName();
+                    User user = userRepository.findByUsername(username)
+                            .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+                    return user.getId();
+                }
+            } catch (Exception ignored) {
+            }
             throw new RuntimeException("Không tìm thấy token xác thực");
         }
+
         String token = header.substring(7);
         String username = jwtUtils.extractUsername(token);
         User user = userRepository.findByUsername(username)

@@ -35,7 +35,10 @@ public class PaymentTransaction {
     private BigDecimal amount;
 
     private String transactionCode;
+
+    @Column(length = 1000)
     private String qrUrl;
+
     private String notes;
 
     @CreationTimestamp

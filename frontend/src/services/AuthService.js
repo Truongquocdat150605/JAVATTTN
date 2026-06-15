@@ -4,8 +4,8 @@ const AuthService = {
     login: async (username, password) => {
         const response = await api.post('/auth/login', { username, password });
         if (response.token) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify(response));
+            sessionStorage.setItem('token', response.token);
+            sessionStorage.setItem('user', JSON.stringify(response));
         }
         return response;
     },
@@ -15,12 +15,12 @@ const AuthService = {
     },
     
     logout: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
     },
     
     getCurrentUser: () => {
-        const user = localStorage.getItem('user');
+        const user = sessionStorage.getItem('user');
         return user ? JSON.parse(user) : null;
     }
 };

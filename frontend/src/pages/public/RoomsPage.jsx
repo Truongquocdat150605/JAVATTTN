@@ -1,178 +1,242 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// frontend/src/pages/public/RoomsPage.jsx
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../services/api";
-import { formatVND } from "../../utils/formatVND";
 import {
-  Container, Grid, Card, CardMedia, CardContent, CardActions, Typography, Button, TextField, Box, InputAdornment, CircularProgress, Alert
+  Container, Grid, Typography, Button, Box,
+  Alert, Pagination, Stack, Chip,
 } from "@mui/material";
-import SearchIcon from '@mui/icons-material/Search';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import SquareFootIcon from '@mui/icons-material/SquareFoot';
+import ClearAllIcon from "@mui/icons-material/ClearAll";
+import { motion } from "framer-motion";
+import useDebounce from "../../hooks/useDebounce";
+import RoomCard from "../../components/rooms/RoomCard";
+import PillFilter from "../../components/common/PillFilter";
+import EmptyState from "../../components/common/EmptyState";
+import RoomCardSkeleton from "../../components/rooms/RoomCardSkeleton";
+import RoomsHero from "../../components/rooms/RoomsHero";
 
-const PLACEHOLDER_IMG = "https://via.placeholder.com/600x400?text=No+Image";
-const IMAGE_BASE = "http://localhost:8082/uploads/";
+const PRICE_FILTERS = [
+  { label: "Tất cả", value: "" },
+  { label: "Dưới 2 triệu", value: "2000000" },
+  { label: "2 – 5 triệu", value: "5000000" },
+  { label: "5 – 10 triệu", value: "10000000" },
+  { label: "Trên 10 triệu", value: "99000000" },
+];
 
-const getRoomImageUrl = (imageFileName) => {
-  if (!imageFileName) return PLACEHOLDER_IMG;
-  return `${IMAGE_BASE}${imageFileName}`;
-};
+const AREA_FILTERS = [
+  { label: "Tất cả", value: "" },
+  { label: "≥ 15m²", value: "15" },
+  { label: "≥ 20m²", value: "20" },
+  { label: "≥ 30m²", value: "30" },
+  { label: "≥ 40m²", value: "40" },
+];
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [filters, setFilters] = useState({ q: "", maxPrice: "", minArea: "" });
+  const [page, setPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const debouncedQ = useDebounce(filters.q, 300);
+  const debouncedMaxPrice = useDebounce(filters.maxPrice, 300);
+  const debouncedMinArea = useDebounce(filters.minArea, 300);
+
+  const itemsPerPage = 9;
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    api.get("/rooms/available")
+    const params = new URLSearchParams(location.search);
+    const keyword = params.get("keyword");
+    if (keyword) {
+      setFilters((prev) => ({ ...prev, q: keyword }));
+      setPage(1);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    api
+      .get("/rooms/available")
       .then((res) => {
-        // Handle standard array response or wrapped response
         const data = res.data || res;
-        if (Array.isArray(data)) {
-            setRooms(data);
-        } else {
-            setRooms([]);
-            console.error("Invalid response format", res);
-        }
+        setRooms(Array.isArray(data) ? data : []);
       })
-      .catch((err) => {
-          console.error(err);
-          setErrorMsg("Không thể tải danh sách phòng. Vui lòng thử lại sau.");
-      })
+      .catch(() => setErrorMsg("Không thể tải danh sách phòng. Vui lòng thử lại sau."))
       .finally(() => setLoading(false));
   }, []);
 
   const visibleRooms = useMemo(() => {
+    const q = (debouncedQ || "").toLowerCase().trim();
     return rooms.filter((r) => {
-      const matchQ = !filters.q || (r.roomNumber && String(r.roomNumber).toLowerCase().includes(filters.q.toLowerCase())) || (r.description && r.description.toLowerCase().includes(filters.q.toLowerCase()));
-      const matchPrice = !filters.maxPrice || Number(r.price) <= Number(filters.maxPrice);
-      const matchArea = !filters.minArea || Number(r.area) >= Number(filters.minArea);
+      const matchQ =
+        !q ||
+        String(r.roomNumber || "").toLowerCase().includes(q) ||
+        (r.description || "").toLowerCase().includes(q) ||
+        (r.address || "").toLowerCase().includes(q);
+      const matchPrice = !debouncedMaxPrice || Number(r.price) <= Number(debouncedMaxPrice);
+      const matchArea = !debouncedMinArea || Number(r.area) >= Number(debouncedMinArea);
       return matchQ && matchPrice && matchArea;
     });
-  }, [rooms, filters]);
+  }, [rooms, debouncedQ, debouncedMaxPrice, debouncedMinArea]);
 
-  const handleRentClick = (room) => {
+  useEffect(() => { setPage(1); }, [debouncedQ, debouncedMaxPrice, debouncedMinArea]);
+
+  const totalPages = Math.ceil(visibleRooms.length / itemsPerPage);
+  const paginatedRooms = useMemo(
+    () => visibleRooms.slice((page - 1) * itemsPerPage, page * itemsPerPage),
+    [visibleRooms, page]
+  );
+
+  const handleRentClick = useCallback((room) => {
     navigate("/booking-form", { state: { roomId: room.id } });
-  };
+  }, [navigate]);
+
+  const handleViewDetail = useCallback((roomId) => {
+    navigate(`/rooms/${roomId}`);
+  }, [navigate]);
+
+  const clearFilters = useCallback(() => {
+    setFilters({ q: "", maxPrice: "", minArea: "" });
+    setPage(1);
+  }, []);
+
+  const hasActiveFilters = filters.q || filters.maxPrice || filters.minArea;
 
   return (
-    <Box sx={{ py: 6, backgroundColor: "#f8fafc", minHeight: "100vh" }}>
-      <Container maxWidth="lg">
-        <Typography variant="h3" fontWeight={900} textAlign="center" gutterBottom color="primary.main" sx={{ mb: 4 }}>
-          Danh Sách Phòng Trống
-        </Typography>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc" }}>
+      <RoomsHero
+        roomsCount={rooms.length}
+        searchValue={filters.q}
+        onSearchChange={(e) => setFilters((p) => ({ ...p, q: e.target.value }))}
+        onToggleFilters={() => setShowFilters(!showFilters)}
+      />
 
-        {/* Filter Section */}
-        <Card sx={{ p: 3, mb: 5, borderRadius: 3, boxShadow: "0 10px 30px rgba(15,23,42,0.05)" }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <TextField 
-                fullWidth 
-                placeholder="Tìm mã phòng, mô tả..." 
-                variant="outlined" 
-                value={filters.q} 
-                onChange={(e) => setFilters({ ...filters, q: e.target.value })}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><SearchIcon color="action"/></InputAdornment>
-                }}
+      {/* FILTER PANEL */}
+      <motion.div
+        initial={false}
+        animate={{ height: showFilters ? "auto" : 0, opacity: showFilters ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+        style={{ overflow: "hidden" }}
+      >
+        <Box sx={{ bgcolor: "#fff", borderBottom: "1px solid #f1f5f9", py: 3 }}>
+          <Container maxWidth="xl">
+            <Stack direction={{ xs: "column", md: "row" }} spacing={4} alignItems={{ md: "flex-end" }} justifyContent="space-between">
+              <PillFilter
+                label="💰 Giá thuê"
+                options={PRICE_FILTERS}
+                value={filters.maxPrice}
+                onChange={(v) => setFilters((p) => ({ ...p, maxPrice: v }))}
               />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                fullWidth 
-                type="number" 
-                placeholder="Giá tối đa" 
-                variant="outlined" 
-                value={filters.maxPrice} 
-                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><AttachMoneyIcon color="action"/></InputAdornment>
-                }}
+              <PillFilter
+                label="📐 Diện tích tối thiểu"
+                options={AREA_FILTERS}
+                value={filters.minArea}
+                onChange={(v) => setFilters((p) => ({ ...p, minArea: v }))}
               />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField 
-                fullWidth 
-                type="number" 
-                placeholder="Diện tích tối thiểu" 
-                variant="outlined" 
-                value={filters.minArea} 
-                onChange={(e) => setFilters({ ...filters, minArea: e.target.value })}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><SquareFootIcon color="action"/></InputAdornment>
-                }}
-              />
-            </Grid>
-          </Grid>
-        </Card>
+              {hasActiveFilters && (
+                <Button
+                  startIcon={<ClearAllIcon />}
+                  onClick={clearFilters}
+                  sx={{ color: "#ef4444", fontWeight: 700, textTransform: "none", whiteSpace: "nowrap" }}
+                >
+                  Xóa bộ lọc
+                </Button>
+              )}
+            </Stack>
+          </Container>
+        </Box>
+      </motion.div>
 
-        {errorMsg && <Alert severity="error" sx={{ mb: 4 }}>{errorMsg}</Alert>}
+      {/* MAIN CONTENT */}
+      <Container maxWidth="xl" sx={{ py: 5 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
+          <Box>
+            <Typography variant="h5" fontWeight={800} color="#0f172a">
+              {loading ? "Đang tải..." : `${visibleRooms.length} phòng phù hợp`}
+            </Typography>
+            {hasActiveFilters && !loading && (
+              <Typography variant="body2" color="text.secondary" mt={0.5}>
+                Đang áp dụng bộ lọc •{" "}
+                <Box
+                  component="span"
+                  onClick={clearFilters}
+                  sx={{ color: "#0f766e", cursor: "pointer", fontWeight: 700, "&:hover": { textDecoration: "underline" } }}
+                >
+                  Xóa tất cả
+                </Box>
+              </Typography>
+            )}
+          </Box>
+        </Stack>
+
+        {errorMsg && <Alert severity="error" sx={{ mb: 4, borderRadius: 3, fontWeight: 600 }}>{errorMsg}</Alert>}
 
         {loading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-            <CircularProgress />
-          </Box>
-        ) : visibleRooms.length === 0 && !errorMsg ? (
-          <Alert severity="info" sx={{ borderRadius: 2 }}>Không tìm thấy phòng nào phù hợp.</Alert>
-        ) : (
-          <Grid container spacing={4}>
-            {visibleRooms.map((room) => (
-              <Grid item xs={12} sm={6} md={4} key={room.id}>
-                <Card sx={{ 
-                  borderRadius: "16px", 
-                  height: "100%", 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  boxShadow: "0 10px 30px rgba(15,23,42,0.08)", 
-                  border: "1px solid rgba(148,163,184,0.2)", 
-                  transition: "transform 0.3s ease",
-                  "&:hover": { transform: "translateY(-5px)", boxShadow: "0 15px 40px rgba(15,23,42,0.12)" }
-                }}>
-                  <CardMedia 
-                    component="img" 
-                    height="200" 
-                    image={getRoomImageUrl(room.imageFileName)} 
-                    alt={`Phòng ${room.roomNumber}`}
-                    onError={(e) => { e.target.src = PLACEHOLDER_IMG; }}
-                  />
-                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: "text.primary" }}>
-                      Phòng {room.roomNumber}
-                    </Typography>
-                    <Typography sx={{ color: "primary.main", fontWeight: 700, fontSize: "1.1rem", mb: 1 }}>
-                      {formatVND(room.price)} / tháng
-                    </Typography>
-                    <Box display="flex" alignItems="center" gap={0.5} mb={2}>
-                      <SquareFootIcon fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                        {room.area} m²
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ 
-                      display: '-webkit-box', 
-                      WebkitLineClamp: 3, 
-                      WebkitBoxOrient: 'vertical', 
-                      overflow: 'hidden' 
-                    }}>
-                      {room.description || "Chưa có mô tả."}
-                    </Typography>
-                  </CardContent>
-                  <CardActions sx={{ p: 3, pt: 0 }}>
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      fullWidth 
-                      sx={{ borderRadius: "8px", py: 1, fontWeight: 700 }}
-                      onClick={() => handleRentClick(room)}
-                    >
-                      Đăng ký thuê
-                    </Button>
-                  </CardActions>
-                </Card>
+          <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
+            {[...Array(9)].map((_, i) => (
+              <Grid item xs={12} sm={6} md={6} lg={4} key={i} sx={{ display: "flex" }}>
+                <RoomCardSkeleton />
               </Grid>
             ))}
           </Grid>
+
+        ) : visibleRooms.length === 0 ? (
+          <EmptyState
+            title="Không tìm thấy phòng phù hợp"
+            description="Thử thay đổi bộ lọc hoặc từ khoá tìm kiếm"
+            buttonText="Xóa bộ lọc"
+            onButtonClick={clearFilters}
+          />
+        ) : (
+          <>
+            <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
+              {paginatedRooms.map((room, idx) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={6}
+                  lg={4}
+                  key={room.id}
+                  sx={{ display: "flex" }}
+                >
+                  <RoomCard
+                    room={room}
+                    index={idx}
+                    variant="horizontal"
+                    onViewDetail={() => handleViewDetail(room.id)}
+                    onRentClick={() => handleRentClick(room)}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+
+
+            {totalPages > 1 && (
+              <Stack alignItems="center" mt={6}>
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={(_, v) => { setPage(v); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  size="large"
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      borderRadius: "50%", fontWeight: 700,
+                    },
+                    "& .MuiPaginationItem-root.Mui-selected": {
+                      background: "linear-gradient(135deg, #14b8a6, #0f766e)",
+                      color: "#fff",
+                    },
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary" mt={1.5} fontWeight={600}>
+                  Trang {page} / {totalPages} • {visibleRooms.length} phòng
+                </Typography>
+              </Stack>
+            )}
+          </>
         )}
       </Container>
     </Box>
