@@ -15,15 +15,7 @@ import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
 import { RobotoBase64 } from "../../utils/RobotoFont";
 
-// Hàm chuyển tiếng Việt có dấu thành không dấu (để PDF không lỗi font)
-const removeAccents = (str) => {
-  if (!str) return "";
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
-};
+
 
 const ContractSignDialog = ({ open, onClose, contract }) => {
   const sigCanvas = useRef(null);
