@@ -11,7 +11,6 @@ import {
   Button,
   CircularProgress,
   Alert,
-  IconButton,
   Chip,
 } from "@mui/material";
 import {
@@ -35,6 +34,9 @@ const TenantProfile = () => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
+  
+  const [rentalRequests, setRentalRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -55,8 +57,21 @@ const TenantProfile = () => {
     }
   };
 
+  const fetchRentalRequests = async () => {
+    try {
+      setLoadingRequests(true);
+      const data = await api.get("/tenant/my-rental-requests");
+      setRentalRequests(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
+    fetchRentalRequests();
   }, []);
 
   const validateForm = () => {
@@ -262,6 +277,51 @@ const TenantProfile = () => {
             <Typography variant="body2">
               📧 Email: <strong>support@smartphongtro.com</strong>
             </Typography>
+          </Paper>
+        </Grid>
+        {/* Booking History */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 4, borderRadius: 4, mt: 3 }}>
+            <Typography variant="h6" fontWeight={800} mb={2}>
+              Lịch sử đặt phòng
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            {loadingRequests ? (
+               <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}><CircularProgress size={24} /></Box>
+            ) : rentalRequests.length === 0 ? (
+               <Typography color="text.secondary" align="center" py={3}>Bạn chưa có lịch sử đặt phòng nào.</Typography>
+            ) : (
+               <Box sx={{ overflowX: "auto" }}>
+                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                   <thead>
+                     <tr style={{ backgroundColor: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+                       <th style={{ padding: "12px", fontWeight: 600 }}>Ngày đặt</th>
+                       <th style={{ padding: "12px", fontWeight: 600 }}>Họ Tên</th>
+                       <th style={{ padding: "12px", fontWeight: 600 }}>Ghi chú</th>
+                       <th style={{ padding: "12px", fontWeight: 600 }}>Trạng thái</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     {rentalRequests.map((req) => (
+                       <tr key={req.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                         <td style={{ padding: "12px" }}>
+                           {new Date(req.createdAt).toLocaleDateString("vi-VN")}
+                         </td>
+                         <td style={{ padding: "12px" }}>{req.fullName}</td>
+                         <td style={{ padding: "12px" }}>{req.notes || "-"}</td>
+                         <td style={{ padding: "12px" }}>
+                           <Chip 
+                             label={req.status === "PENDING" ? "Đang chờ" : req.status === "APPROVED" ? "Đã duyệt" : req.status === "REJECTED" ? "Đã từ chối" : req.status} 
+                             size="small" 
+                             color={req.status === "PENDING" ? "warning" : req.status === "APPROVED" ? "success" : "error"}
+                           />
+                         </td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </Box>
+            )}
           </Paper>
         </Grid>
       </Grid>

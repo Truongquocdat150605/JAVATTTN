@@ -411,10 +411,33 @@ const Register = () => {
 const onSubmitRegister = async (e) => {
     e.preventDefault();
     setErrorMsg("");
-    if (!canSubmit) {
-        setErrorMsg("Vui lòng kiểm tra lại thông tin và chấp nhận điều khoản.");
+    
+    // Ràng buộc với thông báo rõ ràng
+    if (!form.username.trim()) {
+        setErrorMsg("Vui lòng nhập tên đăng nhập.");
         return;
     }
+    if (!form.fullName.trim()) {
+        setErrorMsg("Vui lòng nhập họ và tên.");
+        return;
+    }
+    if (!form.email.trim() || !/^\S+@\S+\.\S+$/.test(form.email)) {
+        setErrorMsg("Vui lòng nhập email hợp lệ.");
+        return;
+    }
+    if (form.password.length < 6) {
+        setErrorMsg("Mật khẩu phải có ít nhất 6 ký tự.");
+        return;
+    }
+    if (form.password !== form.confirmPassword) {
+        setErrorMsg("Mật khẩu nhập lại không khớp.");
+        return;
+    }
+    if (!form.acceptedTerms) {
+        setErrorMsg("Bạn phải đồng ý với Điều khoản và Chính sách bảo mật.");
+        return;
+    }
+
     try {
         setLoading(true);
         await AuthService.register({

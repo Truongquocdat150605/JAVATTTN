@@ -1,5 +1,7 @@
 package com.example.quanliPT.model;
 
+import com.example.quanliPT.model.enums.IssueStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

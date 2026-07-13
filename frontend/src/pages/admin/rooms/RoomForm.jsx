@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  Stack,
   TextField,
   Typography,
   CircularProgress,
@@ -18,6 +17,8 @@ import {
   Select,
   MenuItem,
   Container,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -30,7 +31,7 @@ import {
 } from "@mui/icons-material";
 import api from "../../../services/api";
 
-const IMAGE_BASE_URL = "http://localhost:8082/uploads/";
+const IMAGE_BASE_URL = (process.env.REACT_APP_API_BASE_URL || "http://localhost:8082") + "/uploads/";
 
 const STATUS_OPTIONS = [
   { value: "AVAILABLE", label: "Trống", color: "#10b981" },
@@ -49,7 +50,9 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
     description: "",
     status: "AVAILABLE",
     image: null,
+    serviceIds: [],
   });
+  const [services, setServices] = useState([]);
   const [previewUrl, setPreviewUrl] = useState("");
   const [imageError, setImageError] = useState(false);
 
@@ -63,12 +66,19 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
         description: initialData.description || "",
         status: initialData.status || "AVAILABLE",
         image: null,
+        serviceIds: Array.isArray(initialData.services) ? initialData.services.map((svc) => svc.id) : [],
       });
       if (initialData.image && !imageError) {
         setPreviewUrl(`${IMAGE_BASE_URL}${initialData.image}`);
       }
     }
   }, [initialData, imageError]);
+
+  useEffect(() => {
+    api.get("/services")
+      .then((data) => setServices(Array.isArray(data) ? data : data?.data || []))
+      .catch(() => setServices([]));
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -121,6 +131,8 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
     if (form.image) {
       data.append("image", form.image);
     }
+
+    form.serviceIds.forEach((id) => data.append("serviceIds", String(id)));
 
     return data;
   };
@@ -268,6 +280,40 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
                   </FormControl>
                 </Grid>
               )}
+
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Dich vu ap dung cho phong</InputLabel>
+                  <Select
+                    multiple
+                    name="serviceIds"
+                    value={form.serviceIds}
+                    label="Dich vu ap dung cho phong"
+                    onChange={(event) => setForm((prev) => ({ ...prev, serviceIds: event.target.value }))}
+                    renderValue={(selected) =>
+                      services
+                        .filter((svc) => selected.includes(svc.id))
+                        .map((svc) => svc.name)
+                        .join(", ")
+                    }
+                  >
+                    {services
+                      .filter((svc) => svc.active && svc.category !== "ELECTRICITY" && svc.category !== "WATER")
+                      .map((svc) => (
+                        <MenuItem key={svc.id} value={svc.id}>
+                          <Checkbox checked={form.serviceIds.includes(svc.id)} />
+                          <ListItemText
+                            primary={svc.name}
+                            secondary={`${Number(svc.price || 0).toLocaleString("vi-VN")} VND / ${svc.unit || "MONTH"}`}
+                          />
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+                <Typography variant="caption" color="text.secondary">
+                  Dien va nuoc tinh rieng theo chi so, khong chon vao phi dich vu co dinh.
+                </Typography>
+              </Grid>
 
               {/* Image Upload */}
               <Grid item xs={12}>

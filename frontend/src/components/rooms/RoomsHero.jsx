@@ -1,4 +1,4 @@
-import { Box, Container, Chip, Typography, Button, TextField, InputAdornment } from "@mui/material";
+import { Box, Container, Chip, Typography, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -23,7 +23,7 @@ const RoomsHero = ({ roomsCount, searchValue, onSearchChange, onToggleFilters })
     <Box sx={{
       position: "absolute",
       inset: 0,
-      background: "linear-gradient(160deg, rgba(15,23,42,0.78) 0%, rgba(15,118,110,0.55) 100%)",
+      background: "linear-gradient(160deg, rgba(62,42,26,0.85) 0%, rgba(139,90,43,0.5) 100%)",
     }} />
     <Container maxWidth="md" sx={{ position: "relative", zIndex: 2, py: { xs: 4, md: 6 }, textAlign: "center" }}>
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
@@ -43,6 +43,7 @@ const RoomsHero = ({ roomsCount, searchValue, onSearchChange, onToggleFilters })
           fontWeight: 900,
           color: "#fff",
           mb: 2,
+          fontFamily: "'Playfair Display', serif",
           fontSize: { xs: "1.8rem", md: "3rem" },
           textShadow: "0 2px 20px rgba(0,0,0,0.3)",
         }}>
@@ -72,7 +73,7 @@ const RoomsHero = ({ roomsCount, searchValue, onSearchChange, onToggleFilters })
           flexWrap: { xs: "wrap", sm: "nowrap" },
           justifyContent: "center"
         }}>
-          <SearchIcon sx={{ color: "#94a3b8", mr: 1, flexShrink: 0 }} />
+          <SearchIcon sx={{ color: "#8B5A2B", mr: 1, flexShrink: 0 }} />
           <input
             value={searchValue}
             onChange={onSearchChange}
@@ -83,7 +84,7 @@ const RoomsHero = ({ roomsCount, searchValue, onSearchChange, onToggleFilters })
               background: "transparent",
               flex: 1,
               fontSize: "0.95rem",
-              color: "#1e293b",
+              color: "#3E2A1A",
               fontFamily: "inherit",
               padding: "8px 0",
               minWidth: 0,
@@ -102,9 +103,9 @@ const RoomsHero = ({ roomsCount, searchValue, onSearchChange, onToggleFilters })
               textTransform: "none",
               fontSize: "0.9rem",
               flexShrink: 0,
-              background: "linear-gradient(135deg, #14b8a6, #0f766e)",
-              boxShadow: "0 4px 14px rgba(15,118,110,0.35)",
-              "&:hover": { background: "linear-gradient(135deg, #0f766e, #134e4a)" },
+              background: "linear-gradient(135deg, #A06E41, #8B5A2B)",
+              boxShadow: "0 4px 14px rgba(139,90,43,0.35)",
+              "&:hover": { background: "linear-gradient(135deg, #8B5A2B, #6A411B)" },
               mt: { xs: 1, sm: 0 }
             }}
           >

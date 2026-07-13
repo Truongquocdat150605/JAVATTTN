@@ -1,5 +1,7 @@
 package com.example.quanliPT.model;
 
+import com.example.quanliPT.model.enums.RoomStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;

@@ -13,6 +13,7 @@ import {
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
+import { RobotoBase64 } from "../../utils/RobotoFont";
 
 // Hàm chuyển tiếng Việt có dấu thành không dấu (để PDF không lỗi font)
 const removeAccents = (str) => {
@@ -50,22 +51,33 @@ const ContractSignDialog = ({ open, onClose, contract }) => {
       const signatureImg = sigCanvas.current.toDataURL("image/png");
       const doc = new jsPDF();
 
+      // Thêm font tiếng Việt
+      doc.addFileToVFS("Roboto-Regular.ttf", RobotoBase64);
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "bold");
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "italic");
+      
+      // Mặc định set font là Roboto
+      doc.setFont("Roboto", "normal");
+
       // ===== HEADER =====
       doc.setFillColor(15, 118, 110);
       doc.rect(0, 0, 210, 35, "F");
 
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(18);
-      doc.text(removeAccents("HỢP ĐỒNG THUÊ PHÒNG TRỌ"), 105, 16, { align: "center" });
+      doc.setFont("Roboto", "bold");
+      doc.text("HỢP ĐỒNG THUÊ PHÒNG TRỌ", 105, 16, { align: "center" });
       doc.setFontSize(10);
-      doc.text(removeAccents("Smart Phòng Trọ - Hệ thống quản lý nhà trọ thông minh"), 105, 26, { align: "center" });
+      doc.setFont("Roboto", "normal");
+      doc.text("Smart Phòng Trọ - Hệ thống quản lý nhà trọ thông minh", 105, 26, { align: "center" });
 
       // ===== Contract Info =====
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("Roboto", "bold");
       doc.text(`Mã hợp đồng: #${contract?.id || "---"}`, 20, 50);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("Roboto", "normal");
       doc.setFontSize(10);
       doc.text(`Ngày ký: ${new Date().toLocaleDateString("vi-VN")}`, 20, 58);
       doc.text(`Trạng thái: Đang hiệu lực`, 120, 58);
@@ -75,19 +87,19 @@ const ContractSignDialog = ({ open, onClose, contract }) => {
 
       // ===== Parties =====
       doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text(removeAccents("BÊN CHO THUÊ (Bên A):"), 20, 74);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("Roboto", "bold");
+      doc.text("BÊN CHO THUÊ (Bên A):", 20, 74);
+      doc.setFont("Roboto", "normal");
       doc.setFontSize(10);
-      doc.text(removeAccents("Smart Phòng Trọ Management System"), 20, 82);
-      doc.text(removeAccents("Hotline: 0123 456 789"), 20, 89);
+      doc.text("Smart Phòng Trọ Management System", 20, 82);
+      doc.text("Hotline: 0123 456 789", 20, 89);
 
       doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text(removeAccents("BÊN THUÊ (Bên B):"), 20, 102);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("Roboto", "bold");
+      doc.text("BÊN THUÊ (Bên B):", 20, 102);
+      doc.setFont("Roboto", "normal");
       doc.setFontSize(10);
-      doc.text(`${removeAccents(contract?.tenant?.fullName) || "---"}`, 20, 110);
+      doc.text(`${contract?.tenant?.fullName || "---"}`, 20, 110);
       doc.text(`Số điện thoại: ${contract?.tenant?.phone || "---"}`, 20, 117);
       doc.text(`Email: ${contract?.tenant?.email || "---"}`, 20, 124);
       if (contract?.tenant?.identityNumber) {
@@ -99,23 +111,23 @@ const ContractSignDialog = ({ open, onClose, contract }) => {
 
       // ===== Contract Details =====
       doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text(removeAccents("NỘI DUNG HỢP ĐỒNG:"), 20, startY + 11);
+      doc.setFont("Roboto", "bold");
+      doc.text("NỘI DUNG HỢP ĐỒNG:", 20, startY + 11);
 
       autoTable(doc, {
         startY: startY + 17,
-        head: [[removeAccents("Nội dung"), removeAccents("Chi tiết")]],
+        head: [["Nội dung", "Chi tiết"]],
         body: [
-          [removeAccents("Phòng thuê"), `Phòng ${contract?.room?.roomNumber || "---"}`],
-          [removeAccents("Giá thuê"), `${new Intl.NumberFormat("vi-VN").format(contract?.rentPrice || 0)} VND/tháng`],
-          [removeAccents("Tiền cọc"), `${new Intl.NumberFormat("vi-VN").format(contract?.deposit || 0)} VND`],
-          [removeAccents("Ngày bắt đầu"), contract?.startDate || "---"],
-          [removeAccents("Ngày kết thúc"), contract?.endDate || "Không xác định"],
-          [removeAccents("Trạng thái"), contract?.status || "---"],
+          ["Phòng thuê", `Phòng ${contract?.room?.roomNumber || "---"}`],
+          ["Giá thuê", `${new Intl.NumberFormat("vi-VN").format(contract?.rentPrice || 0)} VND/tháng`],
+          ["Tiền cọc", `${new Intl.NumberFormat("vi-VN").format(contract?.deposit || 0)} VND`],
+          ["Ngày bắt đầu", contract?.startDate || "---"],
+          ["Ngày kết thúc", contract?.endDate || "Không xác định"],
+          ["Trạng thái", contract?.status || "---"],
         ],
-        headStyles: { fillColor: [15, 118, 110], textColor: 255, fontStyle: "bold" },
+        headStyles: { fillColor: [15, 118, 110], textColor: 255, fontStyle: "bold", font: "Roboto" },
         alternateRowStyles: { fillColor: [240, 253, 250] },
-        styles: { fontSize: 10, cellPadding: 4 },
+        styles: { fontSize: 10, cellPadding: 4, font: "Roboto" },
         margin: { left: 20, right: 20 },
       });
 
@@ -123,9 +135,9 @@ const ContractSignDialog = ({ open, onClose, contract }) => {
 
       // ===== Terms =====
       doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.text(removeAccents("ĐIỀU KHOẢN CHUNG:"), 20, afterTable);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("Roboto", "bold");
+      doc.text("ĐIỀU KHOẢN CHUNG:", 20, afterTable);
+      doc.setFont("Roboto", "normal");
       const terms = [
         "1. Bên B cam kết thanh toán tiền thuê đúng hạn vào ngày 05 hàng tháng.",
         "2. Bên B phải bảo quản tài sản, không gây ồn ào sau 22h.",
@@ -133,7 +145,7 @@ const ContractSignDialog = ({ open, onClose, contract }) => {
         "4. Thông báo trước 30 ngày nếu có nhu cầu chấm dứt hợp đồng.",
       ];
       terms.forEach((term, idx) => {
-        doc.text(removeAccents(term), 20, afterTable + 8 + idx * 7);
+        doc.text(term, 20, afterTable + 8 + idx * 7);
       });
 
       const sigY = afterTable + 46;
@@ -141,18 +153,18 @@ const ContractSignDialog = ({ open, onClose, contract }) => {
       // ===== Signature Section =====
       doc.line(20, sigY, 190, sigY);
 
-      doc.setFont("helvetica", "bold");
+      doc.setFont("Roboto", "bold");
       doc.setFontSize(10);
-      doc.text(removeAccents("BÊN A KÝ TÊN"), 50, sigY + 8, { align: "center" });
-      doc.text(removeAccents("BÊN B KÝ TÊN"), 160, sigY + 8, { align: "center" });
+      doc.text("BÊN A KÝ TÊN", 50, sigY + 8, { align: "center" });
+      doc.text("BÊN B KÝ TÊN", 160, sigY + 8, { align: "center" });
 
-      doc.setFont("helvetica", "normal");
-      doc.text(removeAccents("(Chữ ký điện tử)"), 50, sigY + 14, { align: "center" });
+      doc.setFont("Roboto", "normal");
+      doc.text("(Chữ ký điện tử)", 50, sigY + 14, { align: "center" });
 
       // Embed signature image
       doc.addImage(signatureImg, "PNG", 125, sigY + 8, 70, 28);
 
-      doc.setFont("helvetica", "italic");
+      doc.setFont("Roboto", "italic");
       doc.setFontSize(9);
       doc.setTextColor(120, 120, 120);
       doc.text(`Đã ký điện tử ngày ${new Date().toLocaleDateString("vi-VN")}`, 160, sigY + 40, { align: "center" });
@@ -162,7 +174,8 @@ const ContractSignDialog = ({ open, onClose, contract }) => {
       doc.rect(0, 282, 210, 15, "F");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(8);
-      doc.text(removeAccents("Smart Phòng Trọ © 2026 - Hệ thống quản lý nhà trọ thông minh"), 105, 291, { align: "center" });
+      doc.setFont("Roboto", "normal");
+      doc.text("Smart Phòng Trọ © 2026 - Hệ thống quản lý nhà trọ thông minh", 105, 291, { align: "center" });
 
       doc.save(`hop-dong-${contract?.id || "moi"}-${Date.now()}.pdf`);
       toast.success("Đã ký và xuất hợp đồng PDF thành công!");

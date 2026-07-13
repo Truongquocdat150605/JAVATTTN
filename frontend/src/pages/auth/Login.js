@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Container, Paper, TextField, Button, Typography, Box, Alert, IconButton, InputAdornment } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Visibility, VisibilityOff, Login as LoginIcon, Home as HomeIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import AuthService from '../../services/AuthService';
+import { normalizeRole } from '../../utils/authUtils';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -12,25 +13,48 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.message) {
+            toast.warning(location.state.message, { autoClose: 5000 });
+            // Clean up the state so message doesn't persist on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
 
 // Login.js - phần handleLogin
 const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Validate dữ liệu nhập
+    if (!username.trim()) {
+        setError('Vui lòng nhập tên đăng nhập hoặc email!');
+        return;
+    }
+    if (!password) {
+        setError('Vui lòng nhập mật khẩu!');
+        return;
+    }
+    if (password.length < 4) {
+        setError('Mật khẩu không hợp lệ (phải có ít nhất 4 ký tự)!');
+        return;
+    }
+
     setLoading(true);
     
     try {
         const user = await AuthService.login(username, password);
         // AuthService.login đã tự lưu token và user vào sessionStorage
-        const role = String(user.role || '').toUpperCase();
+        const role = normalizeRole(user.role);
 
         toast.success(`Chào mừng ${user.fullName || user.username} trở lại!`);
 
         if (role === 'ADMIN') {
-            navigate('/admin/dashboard');
+            window.location.href = '/admin/dashboard';
         } else if (role === 'TENANT') {
-            navigate('/');
+            window.location.href = '/';
         } else {
             setError('Tài khoản chưa có quyền hợp lệ');
         }
@@ -229,18 +253,7 @@ const handleLogin = async (e) => {
                             </Typography>
                         </Box>
 
-                        {/* Demo credentials hint */}
-                        <Box sx={{ mt: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2 }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
-                                🔐 Demo tài khoản:
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
-                                Admin: admin / admin123
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
-                                Tenant: tenant / tenant123
-                            </Typography>
-                        </Box>
+
                     </Paper>
                 </motion.div>
             </Container>

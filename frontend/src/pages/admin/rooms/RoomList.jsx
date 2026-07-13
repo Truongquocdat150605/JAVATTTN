@@ -18,16 +18,13 @@ import {
   Box,
   Grid,
   Card,
-  CardContent,
   Tooltip,
   TextField,
   InputAdornment,
   Tabs,
   Tab,
-  Menu,
-  MenuItem,
-  Badge,
-} from "@mui/material";
+  TablePagination,
+  } from "@mui/material";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -35,19 +32,18 @@ import {
   MeetingRoom as MeetingRoomIcon,
   Search as SearchIcon,
   Refresh as RefreshIcon,
-  FilterList as FilterIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Construction as MaintenanceIcon,
-  MoreVert as MoreVertIcon,
   Image as ImageIcon,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import { formatVND } from "../../../utils/formatVND";
+import { paginateRows, sortNewestFirst } from "../../../utils/adminListUtils";
 
-const IMAGE_BASE_URL = "http://localhost:8082/uploads/";
+const IMAGE_BASE_URL = (process.env.REACT_APP_API_BASE_URL || "http://localhost:8082") + "/uploads/";
 
 const STATUS_CONFIG = {
   AVAILABLE: { label: "Trống", color: "#10b981", bgColor: "#d1fae5", icon: <CheckCircleIcon /> },
@@ -78,9 +74,9 @@ const RoomList = () => {
   const [loading, setLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [tabValue, setTabValue] = useState(0);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const navigate = useNavigate();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+      const navigate = useNavigate();
 
   const fetchRooms = async () => {
     try {
@@ -111,16 +107,8 @@ const RoomList = () => {
     }
   };
 
-  const handleMenuOpen = (event, room) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedRoom(room);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedRoom(null);
-  };
-
+  
+  
   // Filter rooms
   const filteredRooms = rooms.filter((room) => {
     const matchSearch =
@@ -135,6 +123,12 @@ const RoomList = () => {
     if (tabValue === 3) return matchSearch && room.status === "MAINTENANCE";
     return matchSearch;
   });
+  const sortedRooms = sortNewestFirst(filteredRooms, ["updatedAt", "lastModifiedDate", "createdAt", "id"]);
+  const paginatedRooms = paginateRows(sortedRooms, page, rowsPerPage);
+
+  useEffect(() => {
+    setPage(0);
+  }, [searchKeyword, tabValue]);
 
   const stats = {
     total: rooms.length,
@@ -253,8 +247,8 @@ const RoomList = () => {
         </Paper>
 
         {/* Rooms Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
-          <Table>
+        <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: "auto", overflowY: "visible", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
+          <Table sx={{ minWidth: 980 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#0f766e" }}>
                 <TableCell sx={{ color: "white", fontWeight: 700 }}>Hình ảnh</TableCell>
@@ -276,7 +270,7 @@ const RoomList = () => {
                 </TableRow>
               )}
 
-              {!loading && filteredRooms.length === 0 && (
+              {!loading && sortedRooms.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                     <MeetingRoomIcon sx={{ fontSize: 48, color: "#cbd5e1", mb: 1 }} />
@@ -289,7 +283,7 @@ const RoomList = () => {
               )}
 
               {!loading &&
-                filteredRooms.map((room) => (
+                paginatedRooms.map((room) => (
                   <TableRow key={room.id} hover>
                     <TableCell>
                       <Avatar
@@ -347,19 +341,25 @@ const RoomList = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-            </TableBody>
+              </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={sortedRooms.length}
+            page={page}
+            onPageChange={(event, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[10, 20, 50]}
+            labelRowsPerPage="Dòng/trang"
+          />
         </TableContainer>
       </Container>
     </Box>
   );
 };
-
-// Card component wrapper
-const CardWrapper = ({ children, sx }) => (
-  <Paper elevation={0} sx={{ p: 2, borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", ...sx }}>
-    {children}
-  </Paper>
-);
 
 export default RoomList;

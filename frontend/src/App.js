@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { CircularProgress, Box } from "@mui/material";
+import { AuthProvider } from "./contexts/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 
@@ -18,17 +19,24 @@ const ResetPassword = React.lazy(() => import("./pages/auth/ResetPassword"));
 
 // ADMIN PAGES
 const AdminDashboard = React.lazy(() => import("./pages/admin/AdminDashboard"));
-const ReportManagement = React.lazy(() => import("./pages/admin/ReportManagement"));
+const ReportMain = React.lazy(() => import("./pages/admin/reports/ReportMain"));
 const RoomList = React.lazy(() => import("./pages/admin/rooms/RoomList"));
 const RoomAdd = React.lazy(() => import("./pages/admin/rooms/RoomAdd"));
 const RoomEdit = React.lazy(() => import("./pages/admin/rooms/RoomEdit"));
-const ContractManagement = React.lazy(() => import("./pages/admin/ContractManagement"));
-const InvoiceManagement = React.lazy(() => import("./pages/admin/InvoiceManagement"));
-const UserManagement = React.lazy(() => import("./pages/admin/UserManagement"));
-const ExpenseManagement = React.lazy(() => import("./pages/admin/ExpenseManagement"));
-const MaintenanceManagement = React.lazy(() => import("./pages/admin/MaintenanceManagement"));
+const ContractList = React.lazy(() => import("./pages/admin/contracts/ContractList"));
+const ContractAdd = React.lazy(() => import("./pages/admin/contracts/ContractAdd"));
+const ContractEdit = React.lazy(() => import("./pages/admin/contracts/ContractEdit"));
+const InvoiceList = React.lazy(() => import("./pages/admin/invoices/InvoiceList"));
+const InvoiceEdit = React.lazy(() => import("./pages/admin/invoices/InvoiceEdit"));
+const ExpenseList = React.lazy(() => import("./pages/admin/expenses/ExpenseList"));
+const ExpenseAdd = React.lazy(() => import("./pages/admin/expenses/ExpenseAdd"));
+const ExpenseEdit = React.lazy(() => import("./pages/admin/expenses/ExpenseEdit"));
+const UserList = React.lazy(() => import("./pages/admin/users/UserList"));
+const UserAdd = React.lazy(() => import("./pages/admin/users/UserAdd"));
+const UserEdit = React.lazy(() => import("./pages/admin/users/UserEdit"));
+const MaintenanceList = React.lazy(() => import("./pages/admin/maintenance/MaintenanceList"));
 const RequestManagement = React.lazy(() => import("./pages/admin/RequestManagement"));
-const NotificationManagement = React.lazy(() => import("./pages/admin/NotificationManagement"));
+const NotificationMain = React.lazy(() => import("./pages/admin/notifications/NotificationMain"));
 const ServiceList = React.lazy(() => import("./pages/admin/services/ServiceList"));
 const ServiceAdd = React.lazy(() => import("./pages/admin/services/ServiceAdd"));
 const ServiceEdit = React.lazy(() => import("./pages/admin/services/ServiceEdit"));
@@ -49,7 +57,6 @@ const TenantMaintenance = React.lazy(() => import("./pages/tenant/TenantMaintena
 const ChangePassword = React.lazy(() => import("./pages/tenant/ChangePassword"));
 const MyPayments = React.lazy(() => import("./pages/tenant/MyPayments"));
 const MyNotifications = React.lazy(() => import("./pages/tenant/MyNotifications"));
-
 const LoadingFallback = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
     <CircularProgress />
@@ -58,12 +65,13 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <Router>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <ChatWidget />
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          {/* AUTH */}
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AuthProvider>
+        <ToastContainer position="top-right" autoClose={3000} />
+        <ChatWidget />
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            {/* AUTH */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -76,16 +84,15 @@ function App() {
             <Route path="rooms/:id" element={<RoomDetail />} />
             <Route path="contact" element={<ContactPage />} />
             <Route path="unauthorized" element={<UnauthorizedPage />} />
-            <Route path="booking-form" element={<BookingFormPage />} />
-
             <Route element={<ProtectedRoute />}>
-              <Route path="tenant/profile" element={<TenantProfile />} />
-              <Route path="my-contracts" element={<MyContracts />} />
-              <Route path="my-invoices" element={<MyInvoices />} />
-              <Route path="my-maintenance" element={<TenantMaintenance />} />
+              <Route path="booking-form" element={<BookingFormPage />} />
+              <Route path="tenant/profile" element={<ProtectedRoute requiredRole="TENANT"><TenantProfile /></ProtectedRoute>} />
+              <Route path="my-contracts" element={<ProtectedRoute requiredRole="TENANT"><MyContracts /></ProtectedRoute>} />
+              <Route path="my-invoices" element={<ProtectedRoute requiredRole="TENANT"><MyInvoices /></ProtectedRoute>} />
+              <Route path="my-maintenance" element={<ProtectedRoute requiredRole="TENANT"><TenantMaintenance /></ProtectedRoute>} />
               <Route path="change-password" element={<ChangePassword />} />
-              <Route path="my-payments" element={<MyPayments />} />
-              <Route path="my-notifications" element={<MyNotifications />} />
+              <Route path="my-payments" element={<ProtectedRoute requiredRole="TENANT"><MyPayments /></ProtectedRoute>} />
+              <Route path="my-notifications" element={<ProtectedRoute requiredRole="TENANT"><MyNotifications /></ProtectedRoute>} />
             </Route>
           </Route>
 
@@ -94,17 +101,27 @@ function App() {
             <Route path="admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="reports" element={<ReportManagement />} />
+              <Route path="profile" element={<TenantProfile />} />
+              <Route path="change-password" element={<ChangePassword />} />
+              <Route path="my-notifications" element={<MyNotifications />} />
+              <Route path="reports" element={<ReportMain />} />
               <Route path="rooms" element={<RoomList />} />
               <Route path="rooms/add" element={<RoomAdd />} />
               <Route path="rooms/edit/:id" element={<RoomEdit />} />
-              <Route path="contracts" element={<ContractManagement />} />
-              <Route path="invoices" element={<InvoiceManagement />} />
-              <Route path="users" element={<UserManagement />} />
-              <Route path="expenses" element={<ExpenseManagement />} />
-              <Route path="maintenance" element={<MaintenanceManagement />} />
+              <Route path="contracts" element={<ContractList />} />
+              <Route path="contracts/add" element={<ContractAdd />} />
+              <Route path="contracts/edit/:id" element={<ContractEdit />} />
+              <Route path="invoices" element={<InvoiceList />} />
+              <Route path="invoices/edit/:id" element={<InvoiceEdit />} />
+              <Route path="users" element={<UserList />} />
+              <Route path="users/add" element={<UserAdd />} />
+              <Route path="users/edit/:id" element={<UserEdit />} />
+              <Route path="expenses" element={<ExpenseList />} />
+              <Route path="expenses/add" element={<ExpenseAdd />} />
+              <Route path="expenses/edit/:id" element={<ExpenseEdit />} />
+              <Route path="maintenance" element={<MaintenanceList />} />
               <Route path="requests" element={<RequestManagement />} />
-              <Route path="notifications" element={<NotificationManagement />} />
+              <Route path="notifications" element={<NotificationMain />} />
               <Route path="services" element={<ServiceList />} />
               <Route path="services/add" element={<ServiceAdd />} />
               <Route path="services/edit/:id" element={<ServiceEdit />} />
@@ -112,6 +129,7 @@ function App() {
           </Route>
         </Routes>
       </Suspense>
+      </AuthProvider>
     </Router>
   );
 }

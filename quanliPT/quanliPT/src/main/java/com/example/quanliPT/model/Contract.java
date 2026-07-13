@@ -1,5 +1,7 @@
 package com.example.quanliPT.model;
 
+import com.example.quanliPT.model.enums.ContractStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -50,5 +52,9 @@ public class Contract {
     @LastModifiedDate
     @Column(name = "last_modified_date")
     private Instant lastModifiedDate;
+
+    @Column(name = "is_expired_notified", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean isExpiredNotified = false;
 }
 

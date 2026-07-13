@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8082/api',
+  baseURL: (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8082') + '/api',
   // Không set Content-Type mặc định ở đây để tránh ghi đè khi gửi FormData (upload QR/image...)
 });
 
@@ -48,7 +48,7 @@ api.interceptors.response.use(
       }
     }
 
-    if (status === 403) {
+    if (status === 403 && !isPublicRequest) {
       toast.error('Bạn không có quyền truy cập');
       if (window.location.pathname !== '/unauthorized') {
         window.location.href = '/unauthorized';

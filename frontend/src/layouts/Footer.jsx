@@ -27,8 +27,8 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        bgcolor: "#0f172a",
-        color: "#e2e8f0",
+        bgcolor: "#3E2A1A",
+        color: "#FDFBF7",
         mt: "auto",
         pt: 6,
         pb: 3,
@@ -37,7 +37,7 @@ const Footer = () => {
       <Container maxWidth="xl">
         <Grid container spacing={4}>
           {/* Company Info */}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="h6" sx={{ fontWeight: 900, mb: 2, color: "#ffffff" }}>
               Smart Phòng Trọ
             </Typography>
@@ -61,7 +61,7 @@ const Footer = () => {
           </Grid>
 
           {/* Quick Links */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: "1rem", color: "#ffffff" }}>
               Liên kết nhanh
             </Typography>
@@ -82,7 +82,7 @@ const Footer = () => {
           </Grid>
 
           {/* Contact Info */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: "1rem", color: "#ffffff" }}>
               Thông tin liên hệ
             </Typography>
@@ -103,7 +103,7 @@ const Footer = () => {
           </Grid>
 
           {/* Newsletter */}
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: "1rem", color: "#ffffff" }}>
               Đăng ký nhận tin
             </Typography>

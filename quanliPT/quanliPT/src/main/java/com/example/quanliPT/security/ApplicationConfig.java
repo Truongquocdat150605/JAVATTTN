@@ -1,6 +1,6 @@
 package com.example.quanliPT.security;
 
-import com.example.quanliPT.repository.UserRepository;
+import com.example.quanliPT.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,3 +38,4 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 }
+

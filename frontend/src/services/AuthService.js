@@ -1,10 +1,12 @@
 import api from './api';
+import { normalizeRole } from '../utils/authUtils';
 
 const AuthService = {
     login: async (username, password) => {
         const response = await api.post('/auth/login', { username, password });
         if (response.token) {
             sessionStorage.setItem('token', response.token);
+            sessionStorage.setItem('role', normalizeRole(response.role));
             sessionStorage.setItem('user', JSON.stringify(response));
         }
         return response;
@@ -16,6 +18,7 @@ const AuthService = {
     
     logout: () => {
         sessionStorage.removeItem('token');
+        sessionStorage.removeItem('role');
         sessionStorage.removeItem('user');
     },
     

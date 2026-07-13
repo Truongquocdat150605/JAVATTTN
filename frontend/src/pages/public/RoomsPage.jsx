@@ -4,8 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../services/api";
 import {
   Container, Grid, Typography, Button, Box,
-  Alert, Pagination, Stack, Chip,
-} from "@mui/material";
+  Alert, Pagination, Stack, } from "@mui/material";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import { motion } from "framer-motion";
 import useDebounce from "../../hooks/useDebounce";
@@ -35,17 +34,26 @@ const RoomsPage = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [filters, setFilters] = useState({ q: "", maxPrice: "", minArea: "" });
+  const [filters, setFilters] = useState({ q: "", maxPrice: "", minArea: "", type: "" });
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
   const debouncedQ = useDebounce(filters.q, 300);
   const debouncedMaxPrice = useDebounce(filters.maxPrice, 300);
   const debouncedMinArea = useDebounce(filters.minArea, 300);
+  const debouncedType = useDebounce(filters.type, 300);
 
   const itemsPerPage = 9;
   const navigate = useNavigate();
   const location = useLocation();
+
+  const TYPE_FILTERS = useMemo(() => {
+    const types = Array.from(new Set(rooms.map(r => r.type).filter(Boolean)));
+    return [
+      { label: "Tất cả Danh mục", value: "" },
+      ...types.map(t => ({ label: t, value: t }))
+    ];
+  }, [rooms]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -77,11 +85,12 @@ const RoomsPage = () => {
         (r.address || "").toLowerCase().includes(q);
       const matchPrice = !debouncedMaxPrice || Number(r.price) <= Number(debouncedMaxPrice);
       const matchArea = !debouncedMinArea || Number(r.area) >= Number(debouncedMinArea);
-      return matchQ && matchPrice && matchArea;
+      const matchType = !debouncedType || r.type === debouncedType;
+      return matchQ && matchPrice && matchArea && matchType;
     });
-  }, [rooms, debouncedQ, debouncedMaxPrice, debouncedMinArea]);
+  }, [rooms, debouncedQ, debouncedMaxPrice, debouncedMinArea, debouncedType]);
 
-  useEffect(() => { setPage(1); }, [debouncedQ, debouncedMaxPrice, debouncedMinArea]);
+  useEffect(() => { setPage(1); }, [debouncedQ, debouncedMaxPrice, debouncedMinArea, debouncedType]);
 
   const totalPages = Math.ceil(visibleRooms.length / itemsPerPage);
   const paginatedRooms = useMemo(
@@ -98,14 +107,14 @@ const RoomsPage = () => {
   }, [navigate]);
 
   const clearFilters = useCallback(() => {
-    setFilters({ q: "", maxPrice: "", minArea: "" });
+    setFilters({ q: "", maxPrice: "", minArea: "", type: "" });
     setPage(1);
   }, []);
 
-  const hasActiveFilters = filters.q || filters.maxPrice || filters.minArea;
+  const hasActiveFilters = filters.q || filters.maxPrice || filters.minArea || filters.type;
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#FDFBF7" }}>
       <RoomsHero
         roomsCount={rooms.length}
         searchValue={filters.q}
@@ -120,26 +129,34 @@ const RoomsPage = () => {
         transition={{ duration: 0.3 }}
         style={{ overflow: "hidden" }}
       >
-        <Box sx={{ bgcolor: "#fff", borderBottom: "1px solid #f1f5f9", py: 3 }}>
+        <Box sx={{ bgcolor: "#fff", borderBottom: "1px solid #EAE0D5", py: 3 }}>
           <Container maxWidth="xl">
             <Stack direction={{ xs: "column", md: "row" }} spacing={4} alignItems={{ md: "flex-end" }} justifyContent="space-between">
-              <PillFilter
-                label="💰 Giá thuê"
-                options={PRICE_FILTERS}
-                value={filters.maxPrice}
-                onChange={(v) => setFilters((p) => ({ ...p, maxPrice: v }))}
-              />
-              <PillFilter
-                label="📐 Diện tích tối thiểu"
-                options={AREA_FILTERS}
-                value={filters.minArea}
-                onChange={(v) => setFilters((p) => ({ ...p, minArea: v }))}
-              />
+              <Stack direction={{ xs: "column", md: "row" }} spacing={4} flexWrap="wrap" useFlexGap>
+                <PillFilter
+                  label="🏠 Danh mục"
+                  options={TYPE_FILTERS}
+                  value={filters.type}
+                  onChange={(v) => setFilters((p) => ({ ...p, type: v }))}
+                />
+                <PillFilter
+                  label="💰 Giá thuê"
+                  options={PRICE_FILTERS}
+                  value={filters.maxPrice}
+                  onChange={(v) => setFilters((p) => ({ ...p, maxPrice: v }))}
+                />
+                <PillFilter
+                  label="📐 Diện tích tối thiểu"
+                  options={AREA_FILTERS}
+                  value={filters.minArea}
+                  onChange={(v) => setFilters((p) => ({ ...p, minArea: v }))}
+                />
+              </Stack>
               {hasActiveFilters && (
                 <Button
                   startIcon={<ClearAllIcon />}
                   onClick={clearFilters}
-                  sx={{ color: "#ef4444", fontWeight: 700, textTransform: "none", whiteSpace: "nowrap" }}
+                  sx={{ color: "#8B5A2B", fontWeight: 700, textTransform: "none", whiteSpace: "nowrap" }}
                 >
                   Xóa bộ lọc
                 </Button>
@@ -153,16 +170,16 @@ const RoomsPage = () => {
       <Container maxWidth="xl" sx={{ py: 5 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
           <Box>
-            <Typography variant="h5" fontWeight={800} color="#0f172a">
+            <Typography variant="h5" fontWeight={800} color="#3E2A1A">
               {loading ? "Đang tải..." : `${visibleRooms.length} phòng phù hợp`}
             </Typography>
             {hasActiveFilters && !loading && (
-              <Typography variant="body2" color="text.secondary" mt={0.5}>
+              <Typography variant="body2" color="#6E5C4F" mt={0.5}>
                 Đang áp dụng bộ lọc •{" "}
                 <Box
                   component="span"
                   onClick={clearFilters}
-                  sx={{ color: "#0f766e", cursor: "pointer", fontWeight: 700, "&:hover": { textDecoration: "underline" } }}
+                  sx={{ color: "#8B5A2B", cursor: "pointer", fontWeight: 700, "&:hover": { textDecoration: "underline" } }}
                 >
                   Xóa tất cả
                 </Box>
@@ -197,7 +214,7 @@ const RoomsPage = () => {
                   item
                   xs={12}
                   sm={6}
-                  md={6}
+                  md={4}
                   lg={4}
                   key={room.id}
                   sx={{ display: "flex" }}
@@ -205,7 +222,7 @@ const RoomsPage = () => {
                   <RoomCard
                     room={room}
                     index={idx}
-                    variant="horizontal"
+                    variant="vertical"
                     onViewDetail={() => handleViewDetail(room.id)}
                     onRentClick={() => handleRentClick(room)}
                   />
@@ -226,7 +243,7 @@ const RoomsPage = () => {
                       borderRadius: "50%", fontWeight: 700,
                     },
                     "& .MuiPaginationItem-root.Mui-selected": {
-                      background: "linear-gradient(135deg, #14b8a6, #0f766e)",
+                      background: "linear-gradient(135deg, #A06E41, #8B5A2B)",
                       color: "#fff",
                     },
                   }}

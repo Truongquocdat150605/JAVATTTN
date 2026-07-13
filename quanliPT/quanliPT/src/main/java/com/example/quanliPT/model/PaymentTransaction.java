@@ -1,5 +1,8 @@
 package com.example.quanliPT.model;
 
+import com.example.quanliPT.model.enums.PaymentMethod;
+import com.example.quanliPT.model.enums.PaymentStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

@@ -6,12 +6,16 @@ export const getCurrentUser = () => {
   }
 };
 
+export const normalizeRole = (role) => {
+  return String(role || "").replace(/^ROLE_/i, "").toUpperCase();
+};
+
 export const getRole = () => {
   const user = getCurrentUser();
-  return sessionStorage.getItem("role") || user?.role || "";
+  return normalizeRole(sessionStorage.getItem("role") || user?.role || "");
 };
 
 export const hasRole = (requiredRole) => {
   if (!requiredRole) return true;
-  return getRole() === requiredRole;
+  return getRole() === normalizeRole(requiredRole);
 };

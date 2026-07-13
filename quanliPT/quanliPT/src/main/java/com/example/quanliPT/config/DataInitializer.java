@@ -1,8 +1,8 @@
 package com.example.quanliPT.config;
 
-import com.example.quanliPT.model.Role;
+import com.example.quanliPT.model.enums.Role;
 import com.example.quanliPT.model.User;
-import com.example.quanliPT.repository.UserRepository;
+import com.example.quanliPT.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,3 +35,4 @@ public class DataInitializer implements CommandLineRunner {
         userRepository.save(admin);
     }
 }
+

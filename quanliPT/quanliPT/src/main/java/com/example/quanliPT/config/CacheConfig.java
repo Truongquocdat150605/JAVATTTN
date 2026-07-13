@@ -16,7 +16,9 @@ public class CacheConfig {
         // Có thể đổi sang Caffeine/Ehcache nếu bạn muốn nâng cấp sau.
         return new ConcurrentMapCacheManager(
                 "roomsAvailable",
-                "roomsById"
+                "roomsById",
+                "roomsHot",
+                "roomsNewest"
         );
     }
 }

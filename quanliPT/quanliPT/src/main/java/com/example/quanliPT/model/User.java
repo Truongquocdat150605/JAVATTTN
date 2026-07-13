@@ -1,8 +1,9 @@
 package com.example.quanliPT.model;
 
+import com.example.quanliPT.model.enums.Role;
+
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -23,15 +24,15 @@ public class User {
 
     @Column(nullable = false)
     private String fullName;
-    
+
     @Column(nullable = false)
     private String email;
-    
+
     private String phone;
-    
+
     @Column(name = "identity_number")
     private String identityNumber; // CCCD/ID Card
-    
+
     private String address; // Quê quán/Thường trú
     private String avatar;
 

@@ -23,6 +23,7 @@ import {
   Tab,
   TextField,
   InputAdornment,
+  TablePagination,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -44,6 +45,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import { formatVND } from "../../../utils/formatVND";
+import { paginateRows, sortNewestFirst } from "../../../utils/adminListUtils";
 
 // Helper để convert enum sang tiếng Việt và lấy icon
 const CATEGORY_CONFIG = {
@@ -84,6 +86,8 @@ const ServiceList = () => {
   const [loading, setLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [tabValue, setTabValue] = useState(0);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const navigate = useNavigate();
 
   const fetchServices = async () => {
@@ -135,6 +139,12 @@ const ServiceList = () => {
     if (tabValue === 2) return matchSearch && !svc.active;
     return matchSearch;
   });
+  const sortedServices = sortNewestFirst(filteredServices, ["updatedAt", "lastModifiedDate", "createdAt", "id"]);
+  const paginatedServices = paginateRows(sortedServices, page, rowsPerPage);
+
+  useEffect(() => {
+    setPage(0);
+  }, [searchKeyword, tabValue]);
 
   const stats = {
     total: services.length,
@@ -244,8 +254,8 @@ const ServiceList = () => {
         </Paper>
 
         {/* Services Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
-          <Table>
+        <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: "auto", overflowY: "visible", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
+          <Table sx={{ minWidth: 920 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#0f766e" }}>
                 <TableCell sx={{ color: "white", fontWeight: 700 }}>Dịch vụ</TableCell>
@@ -266,7 +276,7 @@ const ServiceList = () => {
                 </TableRow>
               )}
 
-              {!loading && filteredServices.length === 0 && (
+              {!loading && sortedServices.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
                     <ServicesIcon sx={{ fontSize: 48, color: "#cbd5e1", mb: 1 }} />
@@ -284,7 +294,7 @@ const ServiceList = () => {
               )}
 
               {!loading &&
-                filteredServices.map((svc) => {
+                paginatedServices.map((svc) => {
                   const categoryConfig = CATEGORY_CONFIG[svc.category] || CATEGORY_CONFIG.OTHER;
                   return (
                     <TableRow key={svc.id} hover sx={{ opacity: svc.active ? 1 : 0.6 }}>
@@ -353,6 +363,19 @@ const ServiceList = () => {
                 })}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={sortedServices.length}
+            page={page}
+            onPageChange={(event, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[10, 20, 50]}
+            labelRowsPerPage="Dòng/trang"
+          />
         </TableContainer>
       </Container>
     </Box>

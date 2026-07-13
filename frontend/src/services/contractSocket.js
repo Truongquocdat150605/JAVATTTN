@@ -8,7 +8,7 @@ export function connectContractSocket({ onMessage }) {
     return client;
   }
 
-  const wsUrl = "http://localhost:8082/ws"; // backend websocket (theo yêu cầu của bạn)
+  const wsUrl = (process.env.REACT_APP_API_BASE_URL || "http://localhost:8082") + "/ws"; // backend websocket (theo yêu cầu của bạn)
   const sock = () => new SockJS(wsUrl);
 
   client = new Client({

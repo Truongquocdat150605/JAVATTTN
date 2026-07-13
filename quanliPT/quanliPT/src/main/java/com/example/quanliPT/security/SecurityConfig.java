@@ -1,6 +1,15 @@
 package com.example.quanliPT.security;
 
-import com.example.quanliPT.repository.UserRepository;
+import com.example.quanliPT.model.*;
+import com.example.quanliPT.repository.auth.*;
+import com.example.quanliPT.repository.user.*;
+import com.example.quanliPT.repository.room.*;
+import com.example.quanliPT.repository.finance.*;
+import com.example.quanliPT.repository.contract.*;
+import com.example.quanliPT.repository.notification.*;
+import com.example.quanliPT.repository.guest.*;
+
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
                         // Cho phép truy cập công khai vào các API khác trong /api/public/
                         .requestMatchers("/api/public/**").permitAll()
+                        // Cho phép WebSocket endpoint
+                        .requestMatchers("/ws/**").permitAll()
                         // Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         
@@ -74,3 +85,5 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 }
+
+

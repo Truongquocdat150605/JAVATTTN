@@ -1,7 +1,7 @@
 package com.example.quanliPT.security;
 
-import com.example.quanliPT.repository.InvoiceRepository;
-import com.example.quanliPT.repository.UserRepository;
+import com.example.quanliPT.repository.finance.InvoiceRepository;
+import com.example.quanliPT.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -40,3 +40,4 @@ public class InvoiceSecurity {
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }
+

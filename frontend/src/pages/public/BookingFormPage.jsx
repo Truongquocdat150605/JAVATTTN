@@ -5,9 +5,13 @@ import { toast } from "react-toastify";
 import {
   Container, Box, Typography, Card, CardContent, TextField, Button, Grid, Divider, CircularProgress, Alert
 } from "@mui/material";
-import { MeetingRoom as RoomIcon, Send as SendIcon, Cancel as CancelIcon, CheckCircle as CheckIcon } from '@mui/icons-material';
+import { MeetingRoom as RoomIcon, Send as SendIcon, Cancel as CancelIcon, CheckCircle as CheckIcon, Lock as LockIcon } from '@mui/icons-material';
+import { useAuth } from "../../contexts/AuthContext";
+import { getCurrentUser } from "../../utils/authUtils";
 
 const BookingFormPage = () => {
+  const { user } = useAuth();
+  const sessionUser = user || getCurrentUser();
   const { state } = useLocation();
   const navigate = useNavigate();
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -15,8 +19,14 @@ const BookingFormPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [form, setForm] = useState({ fullName: "", phone: "", identityNumber: "", desiredMoveInDate: "", note: "" });
-
+  const [form, setForm] = useState({ 
+    fullName: sessionUser?.fullName || "", 
+    phone: sessionUser?.phone || "", 
+    email: sessionUser?.email || "", 
+    identityNumber: sessionUser?.identityNumber || "", 
+    desiredMoveInDate: "", 
+    note: "" 
+  });
   useEffect(() => {
     if (!state?.roomId) {
       toast.error("Không có phòng nào được chọn.");
@@ -39,6 +49,10 @@ const BookingFormPage = () => {
       case "phone":
         if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(value)) error = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 03/05/07/08/09)";
         break;
+      case "email":
+        if (!value.trim()) error = "Vui lòng nhập Email";
+        else if (!/^[\w-.]+@([\w-]+.)+[\w-]{2,4}$/.test(value)) error = "Email không hợp lệ";
+        break;
       case "identityNumber":
         if (value && !/^\d{12}$/.test(value)) error = "CCCD phải đúng 12 số";
         break;
@@ -49,6 +63,16 @@ const BookingFormPage = () => {
         break;
     }
     return error;
+  };
+
+  const isFieldLocked = (name) => {
+    switch (name) {
+      case "fullName": return !!(sessionUser && sessionUser.fullName);
+      case "phone": return !!(sessionUser && sessionUser.phone);
+      case "email": return !!(sessionUser && sessionUser.email);
+      case "identityNumber": return !!(sessionUser && sessionUser.identityNumber);
+      default: return false;
+    }
   };
 
   const handleBlur = (field) => {
@@ -68,12 +92,14 @@ const BookingFormPage = () => {
   const validateAll = () => {
     const newErrors = {};
     Object.keys(form).forEach(key => {
-      const error = validateField(key, form[key]);
-      if (error) newErrors[key] = error;
+      if (!isFieldLocked(key)) {
+        const error = validateField(key, form[key]);
+        if (error) newErrors[key] = error;
+      }
     });
     setErrors(newErrors);
     setTouched({
-      fullName: true, phone: true, identityNumber: true, desiredMoveInDate: true
+      fullName: true, phone: true, email: true, identityNumber: true, desiredMoveInDate: true
     });
     return Object.keys(newErrors).length === 0;
   };
@@ -86,7 +112,7 @@ const BookingFormPage = () => {
     }
     setIsSubmitting(true);
     try {
-      await api.post("/public/rental-requests", { ...form, roomId: selectedRoom.id });
+      await api.post("/public/rental-requests", { ...form, roomId: selectedRoom.id, userId: sessionUser?.id || null });
       toast.success(`Đã gửi yêu cầu thuê phòng ${selectedRoom.roomNumber}!`);
       setTimeout(() => navigate("/rooms"), 1500);
     } catch (err) {
@@ -97,11 +123,12 @@ const BookingFormPage = () => {
   if (loading) return <Box display="flex" justifyContent="center" py={10}><CircularProgress /></Box>;
 
   const fields = [
-    { n: "fullName", l: "Họ và tên *", xs: 12 },
-    { n: "phone", l: "Số điện thoại *", xs: 6 },
-    { n: "identityNumber", l: "CCCD (12 số)", xs: 6 },
-    { n: "desiredMoveInDate", l: "Ngày muốn chuyển vào *", t: "date", xs: 12 },
-    { n: "note", l: "Ghi chú thêm", m: true, r: 4, xs: 12 }
+    { n: "fullName", l: "Họ và tên *", xs: 12, locked: !!(sessionUser && sessionUser.fullName) },
+    { n: "phone", l: "Số điện thoại *", xs: 6, locked: !!(sessionUser && sessionUser.phone) },
+    { n: "email", l: "Email *", t: "email", xs: 6, locked: !!(sessionUser && sessionUser.email) },
+    { n: "identityNumber", l: "CCCD (12 số)", xs: 12, locked: !!(sessionUser && sessionUser.identityNumber) },
+    { n: "desiredMoveInDate", l: "Ngày muốn chuyển vào *", t: "date", xs: 12, locked: false },
+    { n: "note", l: "Ghi chú thêm", m: true, r: 4, xs: 12, locked: false }
   ];
 
   return (
@@ -130,9 +157,13 @@ const BookingFormPage = () => {
                       value={form[f.n]} 
                       error={!!errors[f.n]} 
                       helperText={errors[f.n]}
-                      InputLabelProps={f.t === 'date' ? { shrink: true } : {}}
-                      onBlur={() => handleBlur(f.n)}
-                      onChange={e => handleChange(f.n, e.target.value)} 
+                      InputLabelProps={f.t === 'date' || f.locked ? { shrink: true } : {}}
+                      onBlur={() => !f.locked && handleBlur(f.n)}
+                      onChange={e => !f.locked && handleChange(f.n, e.target.value)} 
+                      disabled={f.locked}
+                      InputProps={{
+                        endAdornment: f.locked ? <LockIcon fontSize="small" sx={{ color: "text.disabled" }} /> : null,
+                      }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,

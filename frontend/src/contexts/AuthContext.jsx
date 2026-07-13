@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { normalizeRole } from "../utils/authUtils";
 
 const AuthContext = createContext(null);
 
@@ -17,17 +18,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("role");
     sessionStorage.removeItem("user");
     setUser(null);
     navigate("/login");
-  };
+  }, [navigate]);
 
   const role = useMemo(() => {
     try {
-      return sessionStorage.getItem("role") || user?.role || null;
+      return normalizeRole(sessionStorage.getItem("role") || user?.role || null);
     } catch {
       return null;
     }
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       isTenant,
       role,
     }),
-    [user, isAdmin, isTenant, role]
+    [user, logout, isAdmin, isTenant, role]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,5 +1,7 @@
 package com.example.quanliPT.model;
 
+import com.example.quanliPT.model.enums.InvoiceStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -65,6 +67,10 @@ public class Invoice {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InvoiceStatus status = InvoiceStatus.UNPAID;
+    
+    @Column(name = "is_overdue_notified", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean isOverdueNotified = false;
     
     private String notes;
 }
