@@ -484,18 +484,20 @@ public class PaymentController {
             String receivedSignature = signatureObj.toString();
 
             // 2. Xác minh chữ ký HMAC (bảo mật - chặn giả mạo)
-            // PayOS sắp xếp key theo thứ tự alphabet
-            String amount = String.valueOf(data.getOrDefault("amount", ""));
-            String cancelUrl = String.valueOf(data.getOrDefault("cancelUrl", ""));
-            String description = String.valueOf(data.getOrDefault("description", ""));
+            // PayOS yêu cầu sắp xếp key theo thứ tự alphabet
             String orderCode = String.valueOf(data.getOrDefault("orderCode", ""));
-            String returnUrl = String.valueOf(data.getOrDefault("returnUrl", ""));
-
-            String dataToVerify = "amount=" + amount
-                    + "&cancelUrl=" + cancelUrl
-                    + "&description=" + description
-                    + "&orderCode=" + orderCode
-                    + "&returnUrl=" + returnUrl;
+            
+            java.util.TreeMap<String, Object> sortedData = new java.util.TreeMap<>(data);
+            StringBuilder dataToVerifyBuilder = new StringBuilder();
+            for (Map.Entry<String, Object> entry : sortedData.entrySet()) {
+                if (entry.getValue() != null && !String.valueOf(entry.getValue()).isEmpty()) {
+                    if (dataToVerifyBuilder.length() > 0) {
+                        dataToVerifyBuilder.append("&");
+                    }
+                    dataToVerifyBuilder.append(entry.getKey()).append("=").append(entry.getValue());
+                }
+            }
+            String dataToVerify = dataToVerifyBuilder.toString();
 
             String expectedSignature = hmacSHA256(dataToVerify, payOSConfig.getChecksumKey());
             if (!expectedSignature.equals(receivedSignature)) {
