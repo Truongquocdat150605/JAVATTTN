@@ -39,7 +39,7 @@ const EXTRA_IMGS = [
 ];
 const getRoomImageUrl = (image) => {
   if (!image) return PLACEHOLDER_IMG;
-  if (image.startsWith("http")) return image;
+  if (image.startsWith("http")) return image.replace("http://", "https://");
   return `${IMAGE_BASE}${image}`;
 };
 

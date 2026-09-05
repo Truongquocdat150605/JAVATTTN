@@ -287,7 +287,7 @@ const RoomList = () => {
                     <TableCell>
                       <Avatar
                         variant="rounded"
-                        src={room.image ? (room.image.startsWith("http") ? room.image : `${IMAGE_BASE_URL}${room.image}`) : ""}
+                        src={room.image ? (room.image.startsWith("http") ? room.image.replace("http://", "https://") : `${IMAGE_BASE_URL}${room.image}`) : ""}
                         sx={{ width: 70, height: 52, borderRadius: 2 }}
                       >
                         {!room.image && <ImageIcon sx={{ fontSize: 24, color: "#94a3b8" }} />}

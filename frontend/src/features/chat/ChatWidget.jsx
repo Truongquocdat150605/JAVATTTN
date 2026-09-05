@@ -36,7 +36,7 @@ const formatVND = (value) =>
 
 const getImageUrl = (image) => {
   if (!image) return "";
-  return image.startsWith("http") ? image : `${IMAGE_BASE}${image}`;
+  return image.startsWith("http") ? image.replace("http://", "https://") : `${IMAGE_BASE}${image}`;
 };
 
 const ChatWidget = () => {

@@ -69,7 +69,7 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
       });
       if (initialData.image && !imageError) {
         if (initialData.image.startsWith("http")) {
-          setPreviewUrl(initialData.image);
+          setPreviewUrl(initialData.image.replace("http://", "https://"));
         } else {
           setPreviewUrl(`${IMAGE_BASE_URL}${initialData.image}`);
         }
