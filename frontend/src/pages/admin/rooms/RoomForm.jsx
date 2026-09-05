@@ -67,7 +67,7 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
         image: null,
         serviceIds: Array.isArray(initialData.services) ? initialData.services.map((svc) => svc.id) : [],
       });
-      if (initialData.image && !imageError) {
+      if (initialData.image) {
         if (initialData.image.startsWith("http")) {
           setPreviewUrl(initialData.image.replace("http://", "https://"));
         } else {
@@ -75,7 +75,7 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
         }
       }
     }
-  }, [initialData, imageError]);
+  }, [initialData?.id]);
 
   useEffect(() => {
     api.get("/services")
