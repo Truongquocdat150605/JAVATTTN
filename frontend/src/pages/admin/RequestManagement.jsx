@@ -44,6 +44,7 @@ import { toast } from "react-toastify";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import api from "../../services/api";
+import { WS_URL } from "../../config";
 import ContractDialog from "./requests/ContractDialog";
 import ContactsTab from "./requests/ContactsTab";
 import { paginateRows, sortNewestFirst } from "../../utils/adminListUtils";
@@ -96,7 +97,7 @@ const RequestManagement = () => {
 
   // ── WebSocket realtime ──────────────────────────────────────────────────
   useEffect(() => {
-    const socket = new SockJS((process.env.REACT_APP_API_BASE_URL || "http://localhost:8082") + "/ws");
+    const socket = new SockJS(WS_URL);
     const stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {

@@ -28,6 +28,8 @@ import RoomAmenities from "../../components/roomDetail/RoomAmenities";
 import RoomDescription from "../../components/roomDetail/RoomDescription";
 import RoomActionBox from "../../components/roomDetail/RoomActionBox";
 
+import { UPLOADS_URL as IMAGE_BASE } from "../../config";
+
 const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=85";
 const EXTRA_IMGS = [
   "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
@@ -35,8 +37,11 @@ const EXTRA_IMGS = [
   "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
   "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
 ];
-const IMAGE_BASE = (process.env.REACT_APP_API_BASE_URL || "http://localhost:8082") + "/uploads/";
-const getRoomImageUrl = (image) => (!image ? PLACEHOLDER_IMG : `${IMAGE_BASE}${image}`);
+const getRoomImageUrl = (image) => {
+  if (!image) return PLACEHOLDER_IMG;
+  if (image.startsWith("http")) return image;
+  return `${IMAGE_BASE}${image}`;
+};
 
 const DEFAULT_AMENITIES = [
   { icon: <WifiIcon />, label: "Wifi tốc độ cao" },

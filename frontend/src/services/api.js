@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { API_URL } from '../config';
 
 const api = axios.create({
-  baseURL: (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8082') + '/api',
+  baseURL: API_URL,
   // Không set Content-Type mặc định ở đây để tránh ghi đè khi gửi FormData (upload QR/image...)
 });
 
@@ -12,7 +13,7 @@ api.interceptors.request.use(
     const token = sessionStorage.getItem('token');
     const url = String(config.url || '');
     const method = String(config.method || 'get').toLowerCase();
-    const isAuthenticatedAuthRequest = url === '/auth/change-password';
+    const isAuthenticatedAuthRequest = ['/auth/change-password', '/auth/me', '/auth/profile'].includes(url);
     const isAuthRequest = url.startsWith('/auth/') && !isAuthenticatedAuthRequest;
     // Các request công khai không yêu cầu token
     const isPublicRoomsRequest = method === 'get' && (url === '/rooms' || url.startsWith('/rooms/'));

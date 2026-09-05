@@ -42,8 +42,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import { formatVND } from "../../../utils/formatVND";
 import { paginateRows, sortNewestFirst } from "../../../utils/adminListUtils";
-
-const IMAGE_BASE_URL = (process.env.REACT_APP_API_BASE_URL || "http://localhost:8082") + "/uploads/";
+import { UPLOADS_URL as IMAGE_BASE_URL } from "../../../config";
 
 const STATUS_CONFIG = {
   AVAILABLE: { label: "Trống", color: "#10b981", bgColor: "#d1fae5", icon: <CheckCircleIcon /> },
@@ -288,7 +287,7 @@ const RoomList = () => {
                     <TableCell>
                       <Avatar
                         variant="rounded"
-                        src={room.image ? `${IMAGE_BASE_URL}${room.image}` : ""}
+                        src={room.image ? (room.image.startsWith("http") ? room.image : `${IMAGE_BASE_URL}${room.image}`) : ""}
                         sx={{ width: 70, height: 52, borderRadius: 2 }}
                       >
                         {!room.image && <ImageIcon sx={{ fontSize: 24, color: "#94a3b8" }} />}

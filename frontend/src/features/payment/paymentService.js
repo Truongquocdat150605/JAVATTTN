@@ -9,6 +9,8 @@ const paymentService = {
     api.post(`/payments/stripe/${invoiceId}`),
   payWithPayOS: (invoiceId) =>
     api.post(`/payments/payos/${invoiceId}`),
+  syncPayOSPayment: (paymentId) =>
+    api.put(`/payments/payos/${paymentId}/sync`),
   payWithCash: (invoiceId) =>
     api.post(`/payments/cash/${invoiceId}`),
   confirmCashPayment: (invoiceId) =>

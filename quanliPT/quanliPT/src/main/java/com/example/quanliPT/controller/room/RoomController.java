@@ -40,6 +40,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
 @RestController
 @RequestMapping("/api/rooms")
 @RequiredArgsConstructor
@@ -50,7 +53,7 @@ public class RoomController {
     private final ContractRepository contractRepository;
     private final RoomService roomService;
     private final RentalServiceRepository rentalServiceRepository;
-
+    private final Cloudinary cloudinary;
 
     @Value("${app.upload-dir:uploads}")
     private String uploadDir;
@@ -264,7 +267,7 @@ public class RoomController {
 
             Map<String, String> response = new HashMap<>();
             response.put("fileName", imageName);
-            response.put("filePath", "/uploads/" + imageName);
+            response.put("filePath", imageName);
             response.put("message", "Cập nhật ảnh phòng thành công");
             log.info("Image updated for room id={}: {}", id, imageName);
             return ResponseEntity.ok(response);
@@ -306,29 +309,18 @@ public class RoomController {
     }
 
     private String saveImage(MultipartFile imageFile) throws Exception {
-        log.debug("Saving image file: originalName={}", imageFile.getOriginalFilename());
+        log.debug("Uploading image file: originalName={}", imageFile.getOriginalFilename());
         String contentType = imageFile.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             log.warn("Invalid content type: {}", contentType);
             throw new IllegalArgumentException("Chỉ chấp nhận file ảnh");
         }
-        String originalName = StringUtils.cleanPath(
-                imageFile.getOriginalFilename() != null ? imageFile.getOriginalFilename() : "img"
-        );
-        String ext = originalName.contains(".")
-                ? originalName.substring(originalName.lastIndexOf("."))
-                : "";
-        String fileName = UUID.randomUUID().toString() + ext;
-
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-            log.debug("Upload directory created: {}", uploadPath);
-        }
-
-        imageFile.transferTo(uploadPath.resolve(fileName).toFile());
-        log.info("Image saved: {}", fileName);
-        return fileName;
+        
+        Map uploadResult = cloudinary.uploader().upload(imageFile.getBytes(), ObjectUtils.emptyMap());
+        String imageUrl = uploadResult.get("url").toString();
+        
+        log.info("Image uploaded to Cloudinary: {}", imageUrl);
+        return imageUrl;
     }
 
     private Set<RentalService> loadSelectedServices(List<Long> serviceIds) {

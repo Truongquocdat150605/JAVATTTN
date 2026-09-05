@@ -64,8 +64,29 @@ const MyInvoices = () => {
       const params = new URLSearchParams(window.location.search);
       const status = params.get("status");
       const paymentId = params.get("paymentId");
+      const provider = params.get("provider");
+      const code = params.get("code");
 
-      if (status === "PAID" && paymentId) {
+      if (provider === "payos") {
+        if (status === "CANCELED") {
+          toast.error("Giao dịch PayOS đã bị hủy. Bạn có thể tạo giao dịch mới.");
+        } else if (status === "PAID" && code === "00" && paymentId) {
+          try {
+            const result = await paymentService.syncPayOSPayment(paymentId);
+            if (result?.paid) {
+              toast.success("Thanh toán PayOS thành công!");
+            } else {
+              toast.info("PayOS chưa xác nhận thanh toán. Hệ thống sẽ tiếp tục cập nhật khi nhận được xác nhận.");
+            }
+          } catch (err) {
+            toast.info("Đã quay lại từ PayOS. Nếu bạn đã thanh toán, hệ thống sẽ tự cập nhật sau khi PayOS gửi xác nhận.");
+          }
+        } else {
+          toast.info("Đã quay lại từ PayOS. Nếu bạn đã thanh toán, hệ thống sẽ tự cập nhật sau khi PayOS gửi xác nhận.");
+        }
+        fetchMyInvoices();
+        window.history.replaceState({}, "", "/my-invoices");
+      } else if (status === "PAID" && paymentId) {
         try {
           await paymentService.confirmPayment(paymentId);
           toast.success("🎉 Thanh toán hóa đơn thành công!");

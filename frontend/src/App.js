@@ -40,6 +40,7 @@ const NotificationMain = React.lazy(() => import("./pages/admin/notifications/No
 const ServiceList = React.lazy(() => import("./pages/admin/services/ServiceList"));
 const ServiceAdd = React.lazy(() => import("./pages/admin/services/ServiceAdd"));
 const ServiceEdit = React.lazy(() => import("./pages/admin/services/ServiceEdit"));
+const AccountProfile = React.lazy(() => import("./pages/account/AccountProfile"));
 
 // PUBLIC PAGES
 const RoomsPage = React.lazy(() => import("./pages/public/RoomsPage"));
@@ -84,8 +85,8 @@ function App() {
             <Route path="rooms/:id" element={<RoomDetail />} />
             <Route path="contact" element={<ContactPage />} />
             <Route path="unauthorized" element={<UnauthorizedPage />} />
+            <Route path="booking-form" element={<BookingFormPage />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="booking-form" element={<BookingFormPage />} />
               <Route path="tenant/profile" element={<ProtectedRoute requiredRole="TENANT"><TenantProfile /></ProtectedRoute>} />
               <Route path="my-contracts" element={<ProtectedRoute requiredRole="TENANT"><MyContracts /></ProtectedRoute>} />
               <Route path="my-invoices" element={<ProtectedRoute requiredRole="TENANT"><MyInvoices /></ProtectedRoute>} />
@@ -101,7 +102,7 @@ function App() {
             <Route path="admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="profile" element={<TenantProfile />} />
+              <Route path="profile" element={<AccountProfile />} />
               <Route path="change-password" element={<ChangePassword />} />
               <Route path="my-notifications" element={<MyNotifications />} />
               <Route path="reports" element={<ReportMain />} />

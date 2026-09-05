@@ -38,7 +38,7 @@ const AdminHeader = ({ collapsed, setCollapsed, unreadCount, handleNotificationH
           </Tooltip>
 
           <Tooltip title={unreadCount > 0 ? `Có ${unreadCount} thông báo chưa đọc` : "Không có thông báo mới"}>
-            <IconButton sx={{ color: "inherit" }} onClick={() => navigate("/admin/my-notifications")} onMouseEnter={handleNotificationHover}>
+            <IconButton sx={{ color: "inherit" }} onClick={() => navigate("/admin/notifications")} onMouseEnter={handleNotificationHover}>
               <Badge badgeContent={unreadCount} color="error">
                 <Notifications />
               </Badge>

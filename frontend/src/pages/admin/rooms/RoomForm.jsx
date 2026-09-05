@@ -30,8 +30,7 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import api from "../../../services/api";
-
-const IMAGE_BASE_URL = (process.env.REACT_APP_API_BASE_URL || "http://localhost:8082") + "/uploads/";
+import { UPLOADS_URL as IMAGE_BASE_URL } from "../../../config";
 
 const STATUS_OPTIONS = [
   { value: "AVAILABLE", label: "Trống", color: "#10b981" },
@@ -69,7 +68,11 @@ const RoomForm = ({ initialData, isEdit, roomId }) => {
         serviceIds: Array.isArray(initialData.services) ? initialData.services.map((svc) => svc.id) : [],
       });
       if (initialData.image && !imageError) {
-        setPreviewUrl(`${IMAGE_BASE_URL}${initialData.image}`);
+        if (initialData.image.startsWith("http")) {
+          setPreviewUrl(initialData.image);
+        } else {
+          setPreviewUrl(`${IMAGE_BASE_URL}${initialData.image}`);
+        }
       }
     }
   }, [initialData, imageError]);

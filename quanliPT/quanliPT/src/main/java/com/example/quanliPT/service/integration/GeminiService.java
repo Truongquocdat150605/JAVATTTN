@@ -42,12 +42,13 @@ public class GeminiService {
     private final RoomRepository roomRepository;
 
     private static final String SYSTEM_PROMPT = """
-            Bạn là trợ lý AI của Smart Phòng Trọ.
-            Nhiệm vụ: Tư vấn thuê phòng, báo cáo sự cố, thanh toán.
+            Bạn là trợ lý AI của hệ thống Smart Phòng Trọ (chỉ quản lý một tòa nhà cụ thể).
+            Nhiệm vụ: Tư vấn các phòng đang trống, hướng dẫn thanh toán.
             QUY TẮC NGHIÊM NGẶT:
-            1. Tuyệt đối KHÔNG trả lời các câu hỏi tào lao, ngoài luồng, không liên quan đến phòng trọ. Lịch sự từ chối và nhắc lại bạn chỉ hỗ trợ tìm phòng/thuê phòng.
-            2. Trả lời cực kỳ ngắn gọn, trực tiếp.
-            3. Nếu có danh sách phòng trong CONTEXT, hãy tư vấn dựa trên đó.
+            1. KHÔNG trả lời các câu hỏi tào lao ngoài luồng.
+            2. Trả lời ngắn gọn, thân thiện.
+            3. KHÔNG BAO GIỜ hỏi khách muốn tìm phòng ở "khu vực nào", "quận nào" vì bạn chỉ quản lý một tòa nhà.
+            4. CHỈ giới thiệu các phòng được cung cấp trong phần CONTEXT. Nếu CONTEXT trống, hãy mời khách vào menu "Phòng trọ" để xem chi tiết.
             """;
 
     public ChatResponse processChat(ChatRequest request) {
@@ -117,9 +118,10 @@ public class GeminiService {
     private List<Room> findMatchedRooms(String message) {
         String userMsg = message.toLowerCase();
         
-        // Nếu người dùng chat tào lao (ngắn quá, hoặc không chứa từ khóa liên quan đến phòng), không cần tìm phòng (tránh tốn token)
+        // Cập nhật thêm các từ khóa liệt kê, danh sách
         boolean isAskingForRoom = userMsg.contains("phòng") || userMsg.contains("phong") || userMsg.contains("giá") || userMsg.contains("gia")
-                || userMsg.contains("thuê") || userMsg.contains("thue") || userMsg.contains("trọ") || userMsg.contains("tro") || userMsg.contains("tìm") || userMsg.contains("tim");
+                || userMsg.contains("thuê") || userMsg.contains("thue") || userMsg.contains("trọ") || userMsg.contains("tro") || userMsg.contains("tìm") || userMsg.contains("tim")
+                || userMsg.contains("liệt kê") || userMsg.contains("liet ke") || userMsg.contains("xem") || userMsg.contains("danh sách") || userMsg.contains("danh sach") || userMsg.contains("trống");
                 
         if (!isAskingForRoom) {
             return List.of(); // Trả về rỗng để khỏi tốn Token chèn vào prompt

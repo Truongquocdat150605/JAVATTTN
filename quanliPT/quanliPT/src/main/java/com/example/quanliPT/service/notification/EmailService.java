@@ -152,7 +152,7 @@ public class EmailService {
                         </p>
                         
                         <div style="text-align: center; margin-top: 35px;">
-                            <a href="http://localhost:3000/login" style="background-color: #0f766e; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(15,118,110,0.3);">Đăng nhập ngay</a>
+                            <a href="https://quan-ly-phong-tro-frontend-6fx2h31g2.vercel.app/login" style="background-color: #0f766e; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(15,118,110,0.3);">Đăng nhập ngay</a>
                         </div>
                     </div>
                     
@@ -237,7 +237,7 @@ public class EmailService {
                         </div>
                         
                         <div style="text-align: center; margin-top: 35px;">
-                            <a href="http://localhost:3000/login" style="background-color: #0f766e; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(15,118,110,0.3);">Đăng nhập ngay</a>
+                            <a href="https://quan-ly-phong-tro-frontend-6fx2h31g2.vercel.app/login" style="background-color: #0f766e; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(15,118,110,0.3);">Đăng nhập ngay</a>
                         </div>
                     </div>
                     

@@ -37,8 +37,8 @@ const AdminDashboard = () => {
       setLoading(true);
       const [statsRes, contractsRes, requestsRes] = await Promise.all([
         api.get("/admin/dashboard/stats"),
-        api.get("/contracts").catch(() => []),
-        api.get("/admin/requests/rental").catch(() => []),
+        api.get("/contracts/recent").catch(() => []),
+        api.get("/admin/requests/rental/recent").catch(() => []),
       ]);
 
       if (statsRes?.success && statsRes?.data) setStats(statsRes.data);
