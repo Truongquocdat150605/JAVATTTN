@@ -46,20 +46,20 @@ const handleLogin = async (e) => {
     
     try {
         const user = await AuthService.login(username, password);
-        // AuthService.login đã tự lưu token và user vào sessionStorage
-        const role = normalizeRole(user.role);
+        console.log("🔑 [Login handleLogin] User result:", user);
+        const role = normalizeRole(user?.role);
+        console.log("🔑 [Login handleLogin] Role:", role);
 
-        toast.success(`Chào mừng ${user.fullName || user.username} trở lại!`);
+        toast.success(`Chào mừng ${user?.fullName || user?.username || "bạn"} trở lại!`);
 
         if (role === 'ADMIN') {
             window.location.href = '/admin/dashboard';
-        } else if (role === 'TENANT') {
-            window.location.href = '/';
         } else {
-            setError('Tài khoản chưa có quyền hợp lệ');
+            window.location.href = '/';
         }
     } catch (err) {
-        const errorMessage = err.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không đúng';
+        console.error("❌ [Login handleLogin Error]:", err);
+        const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Tên đăng nhập hoặc mật khẩu không đúng';
         setError(errorMessage);
         toast.error(errorMessage);
     } finally {
