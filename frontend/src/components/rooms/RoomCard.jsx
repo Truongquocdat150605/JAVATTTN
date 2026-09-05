@@ -75,6 +75,10 @@ const RoomCard = React.memo(function RoomCard({
             src={getRoomImageUrl(room.image)}
             alt={`Phòng ${room.roomNumber}`}
             loading="lazy"
+            onError={(e) => {
+              console.error("❌ [RoomCard Image Failed to Load] Room ID:", room?.id, "Attempted src:", e.target.src, "Raw DB image:", room?.image);
+              e.currentTarget.src = PLACEHOLDER_IMG;
+            }}
             style={{
               position: "absolute",
               top: 0,
@@ -85,7 +89,6 @@ const RoomCard = React.memo(function RoomCard({
               display: "block",
               transition: "transform 0.55s cubic-bezier(0.4,0,0.2,1)",
             }}
-            onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMG; }}
           />
 
           {/* Bottom gradient */}

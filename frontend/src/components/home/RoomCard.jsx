@@ -35,7 +35,10 @@ const RoomCard = memo(({ room, onViewDetail, index }) => {
         <Box sx={{ position: "relative", overflow: "hidden", height: 200, borderRadius: "24px 24px 0 0" }}>
           <img className="ri" src={getRoomImageUrl(room.image)} alt={`Phòng ${room.roomNumber}`} loading="lazy"
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.55s cubic-bezier(0.4,0,0.2,1)" }}
-            onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMG; }} />
+            onError={(e) => {
+              console.error("❌ [Home RoomCard Image Failed to Load] Room ID:", room?.id, "Attempted src:", e.target.src, "Raw DB image:", room?.image);
+              e.currentTarget.src = PLACEHOLDER_IMG;
+            }} />
           <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to top, rgba(62, 42, 26,0.5), transparent)", pointerEvents: "none" }} />
           {/* Badge + Like */}
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ position: "absolute", top: 12, left: 12, right: 12, zIndex: 2 }}>
