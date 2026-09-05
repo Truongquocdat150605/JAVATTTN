@@ -288,9 +288,14 @@ const RoomList = () => {
                       <Avatar
                         variant="rounded"
                         src={room.image ? (room.image.startsWith("http") ? room.image.replace("http://", "https://") : `${IMAGE_BASE_URL}${room.image}`) : ""}
+                        imgProps={{
+                          onError: (e) => {
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=200&q=80";
+                          }
+                        }}
                         sx={{ width: 70, height: 52, borderRadius: 2 }}
                       >
-                        {!room.image && <ImageIcon sx={{ fontSize: 24, color: "#94a3b8" }} />}
+                        <ImageIcon sx={{ fontSize: 24, color: "#94a3b8" }} />
                       </Avatar>
                     </TableCell>
                     <TableCell>
