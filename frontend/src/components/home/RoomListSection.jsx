@@ -8,15 +8,15 @@ import { Box, Typography, Stack, Skeleton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import RoomCard from "./RoomCard";
 
-const RoomListSection = ({ title, rooms, loading, icon }) => {
+const RoomListSection = ({ title, rooms, loading }) => {
   const navigate = useNavigate();
 
   return (
     <Box mb={6}>
-      <Typography variant="h4" sx={{ color: "#3E2A1A", mb: 1, pl: 2, borderLeft: "4px solid #8B5A2B" }}>
-        {icon} {title}
+      <Typography variant="h4" sx={{ color: "#0f172a", mb: 1, pl: 2, borderLeft: "4px solid #0f766e", fontWeight: 700 }}>
+        {title}
       </Typography>
-      <Stack direction="row" spacing={3} sx={{ overflowX: "auto", pb: 4, pt: 2, pl: 2, scrollSnapType: "x mandatory", "&::-webkit-scrollbar": { height: 8 }, "&::-webkit-scrollbar-thumb": { borderRadius: 4, bgcolor: "#E6D5C3" } }}>
+      <Stack direction="row" spacing={3} sx={{ overflowX: "auto", pb: 4, pt: 2, pl: 2, scrollSnapType: "x mandatory", "&::-webkit-scrollbar": { height: 6 }, "&::-webkit-scrollbar-thumb": { borderRadius: 3, bgcolor: "#cbd5e1" } }}>
         {(loading ? Array.from({ length: 5 }) : rooms).map((room, i) => (
           <Box key={room?.id ?? i} sx={{ scrollSnapAlign: "start" }}>
             {loading ? (

@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import InvoiceTable from "../../components/tenant/InvoiceTable";
 import InvoiceDetailModal from "../../components/tenant/InvoiceDetailModal";
 import PaymentModal from "../../components/tenant/PaymentModal";
+import { exportInvoicePDF } from "../../utils/invoicePdfExport";
 
 const HEADER_BG = "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)";
 
@@ -89,7 +90,7 @@ const MyInvoices = () => {
       } else if (status === "PAID" && paymentId) {
         try {
           await paymentService.confirmPayment(paymentId);
-          toast.success("🎉 Thanh toán hóa đơn thành công!");
+          toast.success("Thanh toán hóa đơn thành công!");
           fetchMyInvoices();
         } catch (err) {
           console.error(err);
@@ -98,7 +99,7 @@ const MyInvoices = () => {
           window.history.replaceState({}, "", "/my-invoices");
         }
       } else if (status === "CANCELED") {
-        toast.error("❌ Giao dịch thanh toán đã bị hủy.");
+        toast.error("Giao dịch thanh toán đã bị hủy.");
         window.history.replaceState({}, "", "/my-invoices");
       }
     };
@@ -171,7 +172,7 @@ const MyInvoices = () => {
     }
   };
 
-  const handleDownload = (invoice) => toast.info("Đang tải hóa đơn...");
+  const handleDownload = (invoice) => exportInvoicePDF(invoice);
 
   if (loading) {
     return (

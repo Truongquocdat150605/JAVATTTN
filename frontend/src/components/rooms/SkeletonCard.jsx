@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Skeleton } from "@mui/material";
+import { Box, Card, CardContent, Skeleton } from "@mui/material";
 
 const SkeletonCard = ({ variant = "vertical" }) => {
   if (variant === "horizontal") {

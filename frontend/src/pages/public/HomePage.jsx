@@ -42,7 +42,7 @@ const HomePage = () => {
   const handleSearch = () => { if (searchKeyword) navigate(`/rooms?keyword=${searchKeyword}`); };
 
   return (
-    <Box sx={{ bgcolor: "#FDFBF7" }}>
+    <Box sx={{ bgcolor: "#f8fafc" }}>
       {/* 1. Phần Mở đầu */}
       <HeroSection searchKeyword={searchKeyword} setSearchKeyword={setSearchKeyword} onSearch={handleSearch} />
 
@@ -56,14 +56,14 @@ const HomePage = () => {
       <ServicesSection />
 
       {/* 5. Danh sách Phòng */}
-      <Box sx={{ bgcolor: "#FDFBF7", py: { xs: 8, md: 12 } }}>
+      <Box sx={{ bgcolor: "#f8fafc", py: { xs: 8, md: 12 } }}>
         <Box textAlign="center" mb={6}>
-          <Box component="h2" sx={{ color: "#3E2A1A", m: 0, fontSize: "3rem", fontWeight: 700 }}>
-            Góc Nhà Thân Thuộc
+          <Box component="h2" sx={{ color: "#0f172a", m: 0, fontSize: "2.5rem", fontWeight: 700 }}>
+            Phòng Trọ Nổi Bật
           </Box>
         </Box>
-        <RoomListSection title="Phòng mới nhất" rooms={newestRooms} loading={loadingNewest} icon="✨" />
-        <RoomListSection title="Phòng hot nhất" rooms={hotRooms} loading={loadingHot} icon="🔥" />
+        <RoomListSection title="Phòng mới nhất" rooms={newestRooms} loading={loadingNewest} />
+        <RoomListSection title="Phòng hot nhất" rooms={hotRooms} loading={loadingHot} />
       </Box>
 
       {/* 6. Lời kêu gọi hành động (Call To Action) */}

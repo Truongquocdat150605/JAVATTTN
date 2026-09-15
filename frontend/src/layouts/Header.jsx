@@ -44,6 +44,7 @@ import {
   History,
   Settings,
   Help,
+  Close,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import api from "../services/api";
@@ -226,7 +227,7 @@ const Header = () => {
 
             {!isMobile && (
               <Paper elevation={0} sx={{ width: 400, borderRadius: 3, border: "1px solid #e2e8f0", transition: "all 0.3s ease", "&:hover": { borderColor: "#0f766e", boxShadow: "0 0 0 3px rgba(15,118,110,0.1)" } }}>
-                <TextField fullWidth size="small" placeholder="Tìm phòng trọ theo tên, địa chỉ..." value={searchText} onChange={(e) => setSearchText(e.target.value)} onKeyPress={(e) => e.key === "Enter" && handleSearch()} sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }} InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: "#94a3b8" }} /></InputAdornment>, endAdornment: searchText && <InputAdornment position="end"><IconButton size="small" onClick={() => setSearchText("")}>✕</IconButton></InputAdornment> }} />
+                <TextField fullWidth size="small" placeholder="Tìm phòng trọ theo tên, địa chỉ..." value={searchText} onChange={(e) => setSearchText(e.target.value)} onKeyPress={(e) => e.key === "Enter" && handleSearch()} sx={{ "& .MuiOutlinedInput-root": { borderRadius: 3 } }} InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: "#94a3b8" }} /></InputAdornment>, endAdornment: searchText && <InputAdornment position="end"><IconButton size="small" onClick={() => setSearchText("")}><Close sx={{ fontSize: 16 }} /></IconButton></InputAdornment> }} />
               </Paper>
             )}
 

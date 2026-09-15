@@ -55,11 +55,20 @@ const ContractList = () => {
     fetchData();
   }, []);
 
+  const isExpiringSoon = (contract) => {
+    if (!contract.endDate || contract.status !== "ACTIVE") return false;
+    const end = new Date(contract.endDate);
+    const now = new Date();
+    const diffDays = (end - now) / (1000 * 60 * 60 * 24);
+    return diffDays >= 0 && diffDays <= 30;
+  };
+
   const filteredContracts = contracts.filter((contract) => {
     if (tabValue === 0) return true;
     if (tabValue === 1) return contract.status === "ACTIVE";
     if (tabValue === 2) return contract.status === "PENDING";
     if (tabValue === 3) return contract.status === "EXPIRED";
+    if (tabValue === 4) return isExpiringSoon(contract);
     return true;
   });
   const sortedContracts = sortNewestFirst(filteredContracts, ["lastModifiedDate", "updatedAt", "createdAt", "startDate", "id"]);
@@ -74,6 +83,7 @@ const ContractList = () => {
     active: contracts.filter((c) => c.status === "ACTIVE").length,
     pending: contracts.filter((c) => c.status === "PENDING").length,
     expired: contracts.filter((c) => c.status === "EXPIRED").length,
+    expiringSoon: contracts.filter(isExpiringSoon).length,
   };
 
   const handleDelete = async (id) => {
@@ -154,6 +164,7 @@ const ContractList = () => {
             <Tab label="Đang hiệu lực" />
             <Tab label="Chờ duyệt" />
             <Tab label="Hết hạn" />
+            <Tab label={`Sắp hết hạn (${stats.expiringSoon})`} />
           </Tabs>
         </Box>
 

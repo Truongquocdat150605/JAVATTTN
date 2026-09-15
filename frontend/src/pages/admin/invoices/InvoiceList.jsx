@@ -168,6 +168,30 @@ const InvoiceList = () => {
   });
   const paginatedInvoices = paginateRows(filteredInvoices, page, rowsPerPage);
 
+  const handleRunOverdueCheck = async () => {
+    try {
+      setLoading(true);
+      await api.post("/admin/automated-tasks/run-overdue-check");
+      toast.success("Đã kích hoạt quét hóa đơn quá hạn & cảnh báo nợ thành công!");
+      fetchInvoices();
+    } catch (error) {
+      toast.error("Lỗi khi kích hoạt quét hóa đơn quá hạn");
+      setLoading(false);
+    }
+  };
+
+  const handleRunExpiredContractsCheck = async () => {
+    try {
+      setLoading(true);
+      await api.post("/admin/automated-tasks/run-expired-contracts-check");
+      toast.success("Đã kích hoạt quét hợp đồng hết hạn thành công!");
+      fetchInvoices();
+    } catch (error) {
+      toast.error("Lỗi khi quét hợp đồng hết hạn");
+      setLoading(false);
+    }
+  };
+
   const handleGenerateMonthly = async () => {
     if (window.confirm("Chạy demo sinh hóa đơn cho tất cả phòng đang thuê? Chế độ demo sẽ tạo thêm hóa đơn mới ngay cả khi tháng này đã có hóa đơn.")) {
       try {
@@ -207,35 +231,54 @@ const InvoiceList = () => {
         {/* Header */}
         <Paper sx={{ p: 4, mb: 4, borderRadius: 4, background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)", color: "white" }}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <ReceiptIcon sx={{ fontSize: 48 }} />
               <Box>
-                <Typography variant="h4" fontWeight={800}>Quản Lý Hóa Đơn</Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>Quản lý hóa đơn tiền phòng, điện, nước, dịch vụ</Typography>
+                <Typography variant="h4" fontWeight={800}>Quản Lý Hóa Đơn & Tiến Trình Tự Động</Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Quản lý hóa đơn tiền phòng, điện, nước và tiến trình Cron tự động</Typography>
               </Box>
             </Box>
-            <Button 
-              variant="contained" 
-              color="warning" 
-              onClick={handleGenerateMonthly}
-              sx={{ fontWeight: "bold", borderRadius: 2, boxShadow: 3 }}
-            >
-              ⚡ Chạy Sinh Hóa Đơn (Demo)
-            </Button>
+            <Stack direction="row" spacing={1.5} flexWrap="wrap">
+              <Button 
+                variant="contained" 
+                color="warning" 
+                onClick={handleGenerateMonthly}
+                sx={{ fontWeight: "bold", borderRadius: 2, boxShadow: 3 }}
+              >
+                Lập hóa đơn tự động
+              </Button>
+              <Button 
+                variant="contained" 
+                sx={{ bgcolor: "#e11d48", fontWeight: "bold", borderRadius: 2, "&:hover": { bgcolor: "#be123c" } }} 
+                onClick={handleRunOverdueCheck}
+              >
+                Quét nợ quá hạn
+              </Button>
+              <Button 
+                variant="contained" 
+                sx={{ bgcolor: "#3b82f6", fontWeight: "bold", borderRadius: 2, "&:hover": { bgcolor: "#1d4ed8" } }} 
+                onClick={handleRunExpiredContractsCheck}
+              >
+                Quét HĐ hết hạn
+              </Button>
+            </Stack>
           </Box>
         </Paper>
 
         {schedulerStatus && (
-          <Paper sx={{ p: 2, mb: 3, borderRadius: 2, border: "1px solid #fde68a", bgcolor: "#fffbeb" }}>
-              <Typography variant="body2" fontWeight={700} color="#92400e">
-              Tự động sinh hóa đơn: cron {schedulerStatus.cron || "-"} {schedulerStatus.forceCreate ? "(demo tạo thật)" : "(chống trùng)"}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Lần chạy gần nhất: {schedulerStatus.lastRunAt ? new Date(schedulerStatus.lastRunAt).toLocaleString("vi-VN") : "Chưa chạy"} |
-              Tạo mới: {schedulerStatus.created ?? 0} |
-              Bỏ qua: {schedulerStatus.skipped ?? 0} |
-              Lỗi: {schedulerStatus.failed ?? 0}
-            </Typography>
+          <Paper sx={{ p: 2, mb: 3, borderRadius: 2, border: "1px solid #cbd5e1", bgcolor: "#ffffff" }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1}>
+              <Box>
+                <Typography variant="body2" fontWeight={700} color="#0f766e">
+                  Cron Scheduler: {schedulerStatus.cron || "0 0 0 1 * ?"} (Chạy tự động lúc 00:00 hằng ngày / ngày 1 hàng tháng)
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Lần chạy gần nhất: {schedulerStatus.lastRunAt ? new Date(schedulerStatus.lastRunAt).toLocaleString("vi-VN") : "Hệ thống đang hoạt động tự động"} |
+                  Hóa đơn tạo: {schedulerStatus.created ?? 0} | Bỏ qua: {schedulerStatus.skipped ?? 0}
+                </Typography>
+              </Box>
+              <Chip label="Cron Active" color="success" size="small" sx={{ fontWeight: 700 }} />
+            </Stack>
           </Paper>
         )}
 

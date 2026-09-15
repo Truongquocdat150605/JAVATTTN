@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import api from "../../services/api";
+import { CONTACT_INFO } from "../../config";
 import { Alert, Box, Button, Card, CircularProgress, Container, Grid, TextField, Typography, Divider, Chip, Stack } from "@mui/material";
 import { Phone, Email, AccessTime, LocationOn, Send, CheckCircle } from "@mui/icons-material";
 
@@ -32,10 +33,10 @@ const ContactPage = () => {
   };
 
   const info = [
-    { icon: <Phone />, label: "HOTLINE", val: "0123 456 789" },
-    { icon: <Email />, label: "EMAIL", val: "contact@smartphongtro.com" },
-    { icon: <AccessTime />, label: "GIỜ LÀM VIỆC", val: "Thứ 2 - Thứ 7 (08:00 - 17:30)" },
-    { icon: <LocationOn />, label: "ĐỊA CHỈ", val: "41 Đường số 5, Tăng Nhơn Phú B, TP. Thủ Đức, TP.HCM" }
+    { icon: <Phone />, label: "HOTLINE", val: CONTACT_INFO.phone },
+    { icon: <Email />, label: "EMAIL", val: CONTACT_INFO.email },
+    { icon: <AccessTime />, label: "GIỜ LÀM VIỆC", val: CONTACT_INFO.workingHours },
+    { icon: <LocationOn />, label: "ĐỊA CHỈ", val: CONTACT_INFO.address }
   ];
 
   return (

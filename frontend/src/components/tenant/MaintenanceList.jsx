@@ -55,11 +55,11 @@ const MaintenanceList = ({ requests }) => {
               </Typography>
               <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 2 }}>
                 <Typography variant="caption" color="text.secondary">
-                  🕐 Ngày tạo: {req.createdAt ? new Date(req.createdAt).toLocaleString("vi-VN") : "-"}
+                  Ngày tạo: {req.createdAt ? new Date(req.createdAt).toLocaleString("vi-VN") : "-"}
                 </Typography>
                 {req.status === "RESOLVED" && req.updatedAt && (
                   <Typography variant="caption" color="text.secondary">
-                    ✅ Hoàn thành: {new Date(req.updatedAt).toLocaleString("vi-VN")}
+                    Hoàn thành: {new Date(req.updatedAt).toLocaleString("vi-VN")}
                   </Typography>
                 )}
               </Box>

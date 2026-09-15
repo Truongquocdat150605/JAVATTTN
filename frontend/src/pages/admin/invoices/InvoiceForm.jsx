@@ -57,7 +57,7 @@ const InvoiceForm = ({ formData, handleChange, handleSubmit, saving, calculateEl
 
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
-            💰 Tiền phòng & Dịch vụ
+            Tiền phòng & Dịch vụ
           </Typography>
           <Stack spacing={2}>
             <TextField label="Tiền phòng (VNĐ)" name="rentalAmount" type="number" fullWidth value={formData.rentalAmount} onChange={handleChange} />

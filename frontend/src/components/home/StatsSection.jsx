@@ -3,17 +3,34 @@
  * @description Phần hiển thị các con số thống kê ấn tượng của hệ thống (Ví dụ: 1000+ Phòng trọ, 98% Hài lòng...).
  * @module components/home
  */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Container, Stack, Typography } from "@mui/material";
-import { Handshake, Restaurant, Home, EmojiEvents } from "@mui/icons-material";
+import { MeetingRoom, RoomService, ThumbUp, Star } from "@mui/icons-material";
 import FadeIn from "./FadeIn";
+import api from "../../services/api";
 
 const StatsSection = () => {
+  const [statsData, setStatsData] = useState({ rooms: 0, services: 0 });
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      api.get("/rooms/available").catch(() => []),
+      api.get("/services").catch(() => []),
+    ]).then(([roomsRes, servicesRes]) => {
+      if (!isMounted) return;
+      const roomsCount = Array.isArray(roomsRes) ? roomsRes.length : (Array.isArray(roomsRes?.data) ? roomsRes.data.length : 0);
+      const servicesCount = Array.isArray(servicesRes) ? servicesRes.length : (Array.isArray(servicesRes?.data) ? servicesRes.data.length : 0);
+      setStatsData({ rooms: roomsCount, services: servicesCount });
+    });
+    return () => { isMounted = false; };
+  }, []);
+
   const stats = [
-    { icon: <Handshake sx={{ fontSize: 40, color: "#8B5A2B" }} />, value: "1,000+", label: "Phòng trọ" },
-    { icon: <Restaurant sx={{ fontSize: 40, color: "#8B5A2B" }} />, value: "500+", label: "Khách hàng" },
-    { icon: <Home sx={{ fontSize: 40, color: "#8B5A2B" }} />, value: "98%", label: "Hài lòng" },
-    { icon: <EmojiEvents sx={{ fontSize: 40, color: "#8B5A2B" }} />, value: "4.9", label: "Đánh giá" },
+    { icon: <MeetingRoom sx={{ fontSize: 36, color: "#8B5A2B" }} />, value: statsData.rooms > 0 ? `${statsData.rooms}+` : "10+", label: "Phòng trống" },
+    { icon: <RoomService sx={{ fontSize: 36, color: "#8B5A2B" }} />, value: statsData.services > 0 ? `${statsData.services}+` : "8+", label: "Dịch vụ" },
+    { icon: <ThumbUp sx={{ fontSize: 36, color: "#8B5A2B" }} />, value: "99%", label: "Hài lòng" },
+    { icon: <Star sx={{ fontSize: 36, color: "#8B5A2B" }} />, value: "4.9/5", label: "Đánh giá" },
   ];
 
   return (
@@ -30,7 +47,7 @@ const StatsSection = () => {
                 transition: "transform 0.3s", "&:hover": { transform: "translateY(-5px)" }
               }}>
                 {s.icon}
-                <Typography variant="h5" sx={{ fontWeight: 800, color: "#3E2A1A", mt: 1 }}>{s.value}</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: "#3E2A1A", mt: 0.5 }}>{s.value}</Typography>
                 <Typography variant="body2" sx={{ color: "#6E5C4F", fontWeight: 700 }}>{s.label}</Typography>
               </Box>
             </FadeIn>

@@ -51,7 +51,7 @@ const MaintenanceForm = ({ open, handleClose, handleSubmit, form, setForm, error
         />
 
         <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
-          <Typography variant="body2" fontWeight={500}>💡 Lưu ý:</Typography>
+          <Typography variant="body2" fontWeight={600}>Lưu ý:</Typography>
           <Typography variant="caption" color="text.secondary">
             • Vui lòng mô tả chi tiết để kỹ thuật viên xử lý nhanh chóng<br />
             • Bạn sẽ nhận được thông báo khi yêu cầu được tiếp nhận<br />

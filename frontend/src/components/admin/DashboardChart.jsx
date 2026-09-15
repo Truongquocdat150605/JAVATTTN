@@ -10,7 +10,7 @@ import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer } 
 const DashboardChart = ({ roomStatusData }) => (
   <Paper sx={{ p: 3, borderRadius: 4, height: "100%", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
     <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
-      🏠 Tình trạng phòng
+      Tình trạng phòng
     </Typography>
     <Box sx={{ width: "100%", height: 280 }}>
       <ResponsiveContainer>

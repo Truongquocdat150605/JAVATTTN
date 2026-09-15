@@ -57,7 +57,7 @@ const TabOverview = ({ reportData, revenueChartData, statusChartData, chartOptio
       <Grid item xs={12}>
         <Paper sx={{ p: 3, borderRadius: 4 }}>
           <Typography variant="h6" fontWeight={800} sx={{ mb: 2 }}>
-            📅 Thống kê theo tháng
+            Thống kê theo tháng
           </Typography>
           <TableContainer>
             <Table>

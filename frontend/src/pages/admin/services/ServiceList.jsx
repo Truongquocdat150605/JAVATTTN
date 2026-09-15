@@ -49,14 +49,14 @@ import { paginateRows, sortNewestFirst } from "../../../utils/adminListUtils";
 
 // Helper để convert enum sang tiếng Việt và lấy icon
 const CATEGORY_CONFIG = {
-  WATER: { label: "💧 Nước", icon: <WaterIcon />, color: "#0f766e" },
-  ELECTRICITY: { label: "⚡ Điện", icon: <ElecIcon />, color: "#f59e0b" },
-  GARBAGE: { label: "🗑️ Rác", icon: <GarbageIcon />, color: "#10b981" },
-  INTERNET: { label: "📡 Internet", icon: <WifiIcon />, color: "#3b82f6" },
-  SECURITY: { label: "🔒 An ninh", icon: <SecurityIcon />, color: "#8b5cf6" },
-  CLEANING: { label: "🧹 Vệ sinh", icon: <CleanIcon />, color: "#ec4898" },
-  MAINTENANCE: { label: "🔧 Bảo trì", icon: <BuildIcon />, color: "#ef4444" },
-  OTHER: { label: "📝 Khác", icon: <CategoryIcon />, color: "#94a3b8" },
+  WATER: { label: "Nước", icon: <WaterIcon />, color: "#0f766e" },
+  ELECTRICITY: { label: "Điện", icon: <ElecIcon />, color: "#f59e0b" },
+  GARBAGE: { label: "Rác", icon: <GarbageIcon />, color: "#10b981" },
+  INTERNET: { label: "Internet", icon: <WifiIcon />, color: "#3b82f6" },
+  SECURITY: { label: "An ninh", icon: <SecurityIcon />, color: "#8b5cf6" },
+  CLEANING: { label: "Vệ sinh", icon: <CleanIcon />, color: "#ec4898" },
+  MAINTENANCE: { label: "Bảo trì", icon: <BuildIcon />, color: "#ef4444" },
+  OTHER: { label: "Khác", icon: <CategoryIcon />, color: "#94a3b8" },
 };
 
 const UNIT_LABELS = {
@@ -231,7 +231,7 @@ const ServiceList = () => {
               <TextField
                 fullWidth
                 size="small"
-                placeholder="🔍 Tìm kiếm dịch vụ..."
+                placeholder="Tìm kiếm dịch vụ..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 InputProps={{

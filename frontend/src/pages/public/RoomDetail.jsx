@@ -53,9 +53,9 @@ const DEFAULT_AMENITIES = [
 ];
 
 const statusConfig = {
-  AVAILABLE: { label: "✅ Còn phòng", color: "#10b981", bg: "#d1fae5" },
-  RENTED: { label: "🔴 Đã cho thuê", color: "#64748b", bg: "#f1f5f9" },
-  MAINTENANCE: { label: "🔧 Đang bảo trì", color: "#f59e0b", bg: "#fef3c7" },
+  AVAILABLE: { label: "Còn phòng", color: "#10b981", bg: "#d1fae5" },
+  RENTED: { label: "Đã cho thuê", color: "#64748b", bg: "#f1f5f9" },
+  MAINTENANCE: { label: "Đang bảo trì", color: "#f59e0b", bg: "#fef3c7" },
 };
 
 const RoomDetail = () => {
@@ -151,7 +151,7 @@ const RoomDetail = () => {
                 <RoomAmenities services={room.services} defaultAmenities={DEFAULT_AMENITIES} />
               </Paper>
               
-              {/* Pricing Details */}
+              {/* Dynamic Pricing Details */}
               <Paper elevation={0} sx={{ 
                 p: { xs: 3, md: 4 }, 
                 borderRadius: "24px", 
@@ -163,36 +163,44 @@ const RoomDetail = () => {
                   <PaymentsIcon sx={{ color: '#0f766e' }} /> Chi phí hàng tháng
                 </Typography>
                 <Grid container spacing={2}>
-                  {[
-                    { label: "Tiền phòng", value: room.price ? new Intl.NumberFormat("vi-VN").format(room.price) + "đ" : "—", icon: <PaymentsIcon color="primary" />, desc: "Thanh toán mỗi tháng" },
-                    { label: "Tiền điện", value: "Tính theo chỉ số", icon: <ElectricIcon color="warning" />, desc: "Giá nhà nước / KWh" },
-                    { label: "Tiền nước", value: "Tính theo khối", icon: <WaterDamageIcon color="info" />, desc: "Hoặc theo người (thực tế)" },
-                    { label: "Tiền cọc", value: "1 tháng", icon: <SecurityIcon color="success" />, desc: "Hoàn trả khi hết HĐ" },
-                  ].map((item, i) => (
-                    <Grid item xs={12} sm={6} key={i}>
-                      <Box sx={{ 
-                        display: 'flex', alignItems: 'flex-start', p: 2, 
-                        bgcolor: "#fff", borderRadius: "16px", 
-                        border: "1px solid #f1f5f9",
-                        transition: "all 0.3s ease",
-                        "&:hover": { borderColor: "#cbd5e1", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }
-                      }}>
+                  {(() => {
+                    const elecService = room.services?.find(s => s.category === 'ELECTRICITY' || s.name?.toLowerCase().includes('điện'));
+                    const waterService = room.services?.find(s => s.category === 'WATER' || s.name?.toLowerCase().includes('nước'));
+
+                    const elecValue = elecService ? `${elecService.price?.toLocaleString("vi-VN")}đ / ${elecService.unit || "kWh"}` : "Theo chỉ số nhà nước";
+                    const waterValue = waterService ? `${waterService.price?.toLocaleString("vi-VN")}đ / ${waterService.unit || "khối"}` : "Theo chỉ số công tơ";
+
+                    return [
+                      { label: "Tiền phòng", value: room.price ? new Intl.NumberFormat("vi-VN").format(room.price) + "đ" : "Liên hệ", icon: <PaymentsIcon color="primary" />, desc: "Thanh toán hàng tháng" },
+                      { label: "Tiền điện", value: elecValue, icon: <ElectricIcon color="warning" />, desc: elecService ? "Đơn giá cài đặt bởi Admin" : "Theo đồng hồ điện" },
+                      { label: "Tiền nước", value: waterValue, icon: <WaterDamageIcon color="info" />, desc: waterService ? "Đơn giá cài đặt bởi Admin" : "Theo khối tiêu thụ" },
+                      { label: "Tiền cọc", value: room.price ? new Intl.NumberFormat("vi-VN").format(room.price) + "đ" : "1 tháng", icon: <SecurityIcon color="success" />, desc: "Hoàn lại khi kết thúc hợp đồng" },
+                    ].map((item, i) => (
+                      <Grid item xs={12} sm={6} key={i}>
                         <Box sx={{ 
-                          p: 1.5, borderRadius: "12px", 
-                          bgcolor: `${item.icon.props.color}.light`, 
-                          color: `${item.icon.props.color}.main`,
-                          mr: 2, display: 'flex', opacity: 0.8
+                          display: 'flex', alignItems: 'flex-start', p: 2, 
+                          bgcolor: "#fff", borderRadius: "16px", 
+                          border: "1px solid #f1f5f9",
+                          transition: "all 0.3s ease",
+                          "&:hover": { borderColor: "#cbd5e1", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }
                         }}>
-                          {React.cloneElement(item.icon, { sx: { fontSize: 24 } })}
+                          <Box sx={{ 
+                            p: 1.5, borderRadius: "12px", 
+                            bgcolor: `${item.icon.props.color}.light`, 
+                            color: `${item.icon.props.color}.main`,
+                            mr: 2, display: 'flex', opacity: 0.8
+                          }}>
+                            {React.cloneElement(item.icon, { sx: { fontSize: 24 } })}
+                          </Box>
+                          <Box>
+                            <Typography color="text.secondary" fontSize="0.875rem" fontWeight={500} mb={0.5}>{item.label}</Typography>
+                            <Typography fontWeight={700} color="#0f172a" fontSize="1.1rem">{item.value}</Typography>
+                            <Typography color="text.disabled" fontSize="0.75rem" mt={0.5}>{item.desc}</Typography>
+                          </Box>
                         </Box>
-                        <Box>
-                          <Typography color="text.secondary" fontSize="0.875rem" fontWeight={500} mb={0.5}>{item.label}</Typography>
-                          <Typography fontWeight={700} color="#0f172a" fontSize="1.1rem">{item.value}</Typography>
-                          <Typography color="text.disabled" fontSize="0.75rem" mt={0.5}>{item.desc}</Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                  ))}
+                      </Grid>
+                    ));
+                  })()}
                 </Grid>
               </Paper>
             </motion.div>

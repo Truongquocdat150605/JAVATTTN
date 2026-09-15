@@ -15,7 +15,7 @@ const TabInvoices = ({ reportData }) => {
   return (
     <Paper sx={{ p: 4, borderRadius: 4 }}>
       <Typography variant="h6" fontWeight={800} sx={{ mb: 3 }}>
-        📋 Danh sách hóa đơn trong kỳ
+        Danh sách hóa đơn trong kỳ
       </Typography>
       <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
         Hiển thị {reportData.totalInvoices} hóa đơn trong khoảng thời gian đã chọn

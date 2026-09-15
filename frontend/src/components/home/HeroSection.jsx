@@ -20,7 +20,7 @@ const HeroSection = ({ searchKeyword, setSearchKeyword, onSearch }) => (
           Tìm Nhà.<br /> Gặp Bạn.<br /> Sống Ấm.
         </Typography>
         <Typography variant="body1" sx={{ color: "#6E5C4F", mb: 5, fontWeight: 500, maxWidth: 600, mx: "auto", fontSize: { xs: "1rem", md: "1.1rem" } }}>
-          Hơn 14,000+ phòng trọ thiết kế đẹp, tiện nghi và ấm cúng đang chờ đón bạn.
+          Hàng trăm phòng trọ thiết kế đẹp, tiện nghi và ấm cúng đang chờ đón bạn.
         </Typography>
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>

@@ -222,7 +222,7 @@ const RoomList = () => {
               <TextField
                 fullWidth
                 size="small"
-                placeholder="🔍 Tìm kiếm theo số phòng, loại phòng..."
+                placeholder="Tìm kiếm theo số phòng, loại phòng..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 InputProps={{

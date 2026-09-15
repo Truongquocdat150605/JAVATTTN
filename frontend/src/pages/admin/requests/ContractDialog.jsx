@@ -135,7 +135,7 @@ const ContractDialog = ({ open, selectedRequest, contractForm, onClose, onChange
             </Grid>
 
             <Alert severity="info">
-              <Typography variant="body2" fontWeight={500}>📝 Lưu ý:</Typography>
+              <Typography variant="body2" fontWeight={600}>Lưu ý:</Typography>
               <Typography variant="caption" color="text.secondary">
                 • Sau khi tạo hợp đồng, hệ thống sẽ tự động tạo hóa đơn hàng tháng<br />
                 • Khách thuê sẽ nhận được thông báo về hợp đồng mới

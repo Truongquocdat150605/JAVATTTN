@@ -196,7 +196,7 @@ const handleSubmit = async (e) => {
                   <Box sx={{ width: passwordStrength.width, height: "100%", bgcolor: passwordStrength.color, transition: "width 0.3s" }} />
                 </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-                  {form.newPassword.length < 6 ? "⚠️ Mật khẩu phải có ít nhất 6 ký tự" : "✓ Mật khẩu hợp lệ"}
+                  {form.newPassword.length < 6 ? "Mật khẩu phải có ít nhất 6 ký tự" : "Mật khẩu hợp lệ"}
                 </Typography>
               </Box>
             )}
@@ -230,8 +230,8 @@ const handleSubmit = async (e) => {
             />
 
             <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-              <Typography variant="body2" fontWeight={500}>
-                🔐 Lưu ý bảo mật:
+              <Typography variant="body2" fontWeight={600}>
+                Lưu ý bảo mật:
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 • Mật khẩu nên có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt

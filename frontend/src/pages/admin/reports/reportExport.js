@@ -36,12 +36,12 @@ export const handleExportPDF = (reportData, dateRange) => {
   // Statistics
   doc.setFontSize(12);
   doc.setTextColor(0);
-  doc.text(`📊 Tổng số hóa đơn: ${reportData.totalInvoices}`, 20, 60);
-  doc.text(`✅ Hóa đơn đã thanh toán: ${reportData.paidInvoices}`, 20, 70);
-  doc.text(`⏳ Hóa đơn chưa thanh toán: ${reportData.unpaidInvoices}`, 20, 80);
-  doc.text(`💰 Tổng doanh thu: ${formatCurrency(reportData.totalRevenue)}`, 20, 90);
-  doc.text(`📈 Giá trị trung bình/hóa đơn: ${formatCurrency(reportData.avgInvoiceValue)}`, 20, 100);
-  doc.text(`🎯 Tỷ lệ hoàn thành: ${reportData.completionRate.toFixed(1)}%`, 20, 110);
+  doc.text(`Tổng số hóa đơn: ${reportData.totalInvoices}`, 20, 60);
+  doc.text(`Hóa đơn đã thanh toán: ${reportData.paidInvoices}`, 20, 70);
+  doc.text(`Hóa đơn chưa thanh toán: ${reportData.unpaidInvoices}`, 20, 80);
+  doc.text(`Tổng doanh thu: ${formatCurrency(reportData.totalRevenue)}`, 20, 90);
+  doc.text(`Giá trị trung bình/hóa đơn: ${formatCurrency(reportData.avgInvoiceValue)}`, 20, 100);
+  doc.text(`Tỷ lệ hoàn thành: ${reportData.completionRate.toFixed(1)}%`, 20, 110);
 
   // Table for monthly data
   if (reportData.monthlyData && reportData.monthlyData.length > 0) {
@@ -118,7 +118,7 @@ export const handleExportExcel = (reportData, dateRange) => {
     }
 
     XLSX.writeFile(wb, `bao-cao-doanh-thu-${Date.now()}.xlsx`);
-    toast.success("✅ Đã xuất file Excel thành công!");
+    toast.success("Đã xuất file Excel thành công!");
   } catch (err) {
     console.error(err);
     toast.error("Xuất Excel thất bại. Vui lòng thử lại.");

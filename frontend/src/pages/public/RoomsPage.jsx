@@ -134,19 +134,19 @@ const RoomsPage = () => {
             <Stack direction={{ xs: "column", md: "row" }} spacing={4} alignItems={{ md: "flex-end" }} justifyContent="space-between">
               <Stack direction={{ xs: "column", md: "row" }} spacing={4} flexWrap="wrap" useFlexGap>
                 <PillFilter
-                  label="🏠 Danh mục"
+                  label="Danh mục"
                   options={TYPE_FILTERS}
                   value={filters.type}
                   onChange={(v) => setFilters((p) => ({ ...p, type: v }))}
                 />
                 <PillFilter
-                  label="💰 Giá thuê"
+                  label="Giá thuê"
                   options={PRICE_FILTERS}
                   value={filters.maxPrice}
                   onChange={(v) => setFilters((p) => ({ ...p, maxPrice: v }))}
                 />
                 <PillFilter
-                  label="📐 Diện tích tối thiểu"
+                  label="Diện tích tối thiểu"
                   options={AREA_FILTERS}
                   value={filters.minArea}
                   onChange={(v) => setFilters((p) => ({ ...p, minArea: v }))}
@@ -156,7 +156,7 @@ const RoomsPage = () => {
                 <Button
                   startIcon={<ClearAllIcon />}
                   onClick={clearFilters}
-                  sx={{ color: "#8B5A2B", fontWeight: 700, textTransform: "none", whiteSpace: "nowrap" }}
+                  sx={{ color: "#0f766e", fontWeight: 600, textTransform: "none", whiteSpace: "nowrap" }}
                 >
                   Xóa bộ lọc
                 </Button>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { CONTACT_INFO } from "../config";
 import {
   Box,
   Container,
@@ -89,15 +90,15 @@ const Footer = () => {
             <Stack spacing={1.5}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Phone sx={{ fontSize: 20, color: "#0f766e" }} />
-                <Typography variant="body2">0123 456 789</Typography>
+                <Typography variant="body2">{CONTACT_INFO.phone}</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Email sx={{ fontSize: 20, color: "#0f766e" }} />
-                <Typography variant="body2">contact@smartphongtro.com</Typography>
+                <Typography variant="body2">{CONTACT_INFO.email}</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocationOn sx={{ fontSize: 20, color: "#0f766e" }} />
-                <Typography variant="body2">41 Đường số 5, Tăng Nhơn Phú B, TP. Thủ Đức, TP.HCM</Typography>
+                <Typography variant="body2">{CONTACT_INFO.address}</Typography>
               </Box>
             </Stack>
           </Grid>

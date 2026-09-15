@@ -183,7 +183,7 @@ const UpdateStatusDialog = ({ open, onClose, issue, onSuccess }) => {
 
           <Alert severity="info" sx={{ borderRadius: 2 }}>
             <Typography variant="caption" display="block">
-              💡 Sau khi cập nhật trạng thái, hệ thống sẽ thông báo đến khách hàng
+              Sau khi cập nhật trạng thái, hệ thống sẽ thông báo đến khách hàng
             </Typography>
           </Alert>
         </Stack>

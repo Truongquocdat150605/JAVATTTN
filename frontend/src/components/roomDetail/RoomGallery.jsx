@@ -37,11 +37,11 @@ const RoomGallery = ({ allImages, activeImg, setActiveImg, setImageError, room }
           {/* Image count badge */}
           <Box sx={{
             position: "absolute", bottom: 16, right: 16,
-            bgcolor: "rgba(0,0,0,0.6)", color: "#fff",
-            px: 2, py: 0.5, borderRadius: "50px",
-            fontSize: "0.8rem", fontWeight: 700, backdropFilter: "blur(4px)",
+            bgcolor: "rgba(15, 23, 42, 0.75)", color: "#fff",
+            px: 2, py: 0.5, borderRadius: "20px",
+            fontSize: "0.8rem", fontWeight: 600, backdropFilter: "blur(4px)",
           }}>
-            📷 {allImages.length} ảnh
+            {allImages.length} ảnh
           </Box>
         </Box>
 

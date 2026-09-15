@@ -1,27 +1,16 @@
 package com.example.quanliPT.controller.admin;
 
-import com.example.quanliPT.model.*;
-import com.example.quanliPT.repository.auth.*;
-import com.example.quanliPT.repository.user.*;
-import com.example.quanliPT.repository.room.*;
-import com.example.quanliPT.repository.finance.*;
-import com.example.quanliPT.repository.contract.*;
-import com.example.quanliPT.repository.notification.*;
-import com.example.quanliPT.repository.guest.*;
-
-import com.example.quanliPT.repository.user.UserRepository;
-import com.example.quanliPT.model.enums.RoomStatus;
-
 import com.example.quanliPT.model.ContactMessage;
 import com.example.quanliPT.model.Contract;
 import com.example.quanliPT.model.RentalRequest;
 import com.example.quanliPT.model.enums.RentalRequestStatus;
-
-import com.example.quanliPT.service.contract.ContractBusinessService;
-import com.example.quanliPT.repository.guest.ContactMessageRepository;
+import com.example.quanliPT.model.enums.RoomStatus;
 import com.example.quanliPT.repository.contract.ContractRepository;
+import com.example.quanliPT.repository.guest.ContactMessageRepository;
 import com.example.quanliPT.repository.guest.RentalRequestRepository;
 import com.example.quanliPT.repository.room.RoomRepository;
+import com.example.quanliPT.repository.user.UserRepository;
+import com.example.quanliPT.service.contract.ContractBusinessService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +72,7 @@ public class AdminRequestController {
     }
 
     @PostMapping("/rental/{id}/approve-and-create-contract")
-    public ResponseEntity<Contract> approveAndCreateContract(
+    public ResponseEntity<?> approveAndCreateContract(
             @PathVariable Long id,
             @RequestParam LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
@@ -108,6 +97,10 @@ public class AdminRequestController {
         if (room == null) {
             log.error("Rental request id={} has no room associated", id);
             throw new RuntimeException("Rental request has no room");
+        }
+
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            return ResponseEntity.badRequest().body("Phòng này hiện đã có người thuê hoặc đang bảo trì!");
         }
 
         Contract savedContract = contractBusinessService.createContractAndTenant(

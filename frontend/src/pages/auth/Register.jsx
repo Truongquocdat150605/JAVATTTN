@@ -652,11 +652,11 @@ const onSubmitRegister = async (e) => {
                   </button>
                 </div>
                 {form.confirmPassword && form.password !== form.confirmPassword && (
-                  <div style={styles.matchErr}>⚠ Mật khẩu nhập lại chưa khớp</div>
+                  <div style={styles.matchErr}>Mật khẩu nhập lại chưa khớp</div>
                 )}
                 {form.confirmPassword && form.password === form.confirmPassword && form.confirmPassword.length > 0 && (
                   <div style={{ fontSize: "12px", color: "#4ade80", marginTop: "4px", fontWeight: 600 }}>
-                    ✓ Mật khẩu khớp
+                    Mật khẩu khớp
                   </div>
                 )}
               </div>
@@ -681,7 +681,7 @@ const onSubmitRegister = async (e) => {
               {/* Error */}
               {errorMsg && (
                 <div style={styles.errorBox}>
-                  <span>⚠</span> {errorMsg}
+                  {errorMsg}
                 </div>
               )}
 

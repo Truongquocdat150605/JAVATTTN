@@ -169,7 +169,7 @@ const MyNotifications = () => {
                   </Typography>
                   
                   <Typography variant="caption" color="text.disabled" display="block" mt={1.5}>
-                    🕐 {n.createdAt ? new Date(n.createdAt).toLocaleString("vi-VN") : "Vừa xong"}
+                    {n.createdAt ? new Date(n.createdAt).toLocaleString("vi-VN") : "Vừa xong"}
                   </Typography>
                 </Box>
 

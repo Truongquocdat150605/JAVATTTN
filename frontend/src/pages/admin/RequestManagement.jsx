@@ -105,7 +105,7 @@ const RequestManagement = () => {
           try {
             const newRequest = JSON.parse(message.body);
             setRentalRequests((prev) => [newRequest, ...prev]);
-            toast.info(`📢 Yêu cầu thuê mới từ ${newRequest.fullName} - Phòng ${newRequest.room?.roomNumber}`);
+            toast.info(`Yêu cầu thuê mới từ ${newRequest.fullName} - Phòng ${newRequest.room?.roomNumber}`);
           } catch (err) {
             console.error("Lỗi parse WebSocket message:", err);
           }
@@ -303,11 +303,11 @@ const RequestManagement = () => {
         {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
           <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} variant="scrollable" scrollButtons="auto">
-            <Tab label="📋 Yêu cầu thuê" />
-            <Tab label={`⏳ Chờ duyệt (${stats.pending})`} />
-            <Tab label="✅ Đã duyệt" />
-            <Tab label="❌ Từ chối" />
-            <Tab label={`💬 Tin nhắn liên hệ (${stats.contacts})`} />
+            <Tab label="Yêu cầu thuê" />
+            <Tab label={`Chờ duyệt (${stats.pending})`} />
+            <Tab label="Đã duyệt" />
+            <Tab label="Từ chối" />
+            <Tab label={`Tin nhắn liên hệ (${stats.contacts})`} />
           </Tabs>
         </Box>
 

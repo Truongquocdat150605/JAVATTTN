@@ -14,7 +14,7 @@ const RecentActivities = ({ recentContracts, recentRequests }) => (
       <Paper sx={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
         <Box sx={{ p: 3, bgcolor: "#0f766e", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            📄 Hợp đồng gần đây
+            Hợp đồng gần đây
           </Typography>
           <Button component={Link} to="/admin/contracts" sx={{ color: "white", "&:hover": { bgcolor: "rgba(255,255,255,0.1)" } }}>
             Xem tất cả
@@ -60,9 +60,9 @@ const RecentActivities = ({ recentContracts, recentRequests }) => (
     {/* Recent Rental Requests */}
     <Grid item xs={12} md={6}>
       <Paper sx={{ borderRadius: 4, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
-        <Box sx={{ p: 3, bgcolor: "#f59e0b", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box sx={{ p: 3, bgcolor: "#0f766e", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            📋 Yêu cầu thuê mới
+            Yêu cầu thuê mới
           </Typography>
           <Button component={Link} to="/admin/requests" sx={{ color: "white", "&:hover": { bgcolor: "rgba(255,255,255,0.1)" } }}>
             Xem tất cả

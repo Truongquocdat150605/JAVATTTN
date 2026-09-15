@@ -9,25 +9,25 @@ import { Link } from "react-router-dom";
 import FadeIn from "./FadeIn";
 
 const CTABanner = () => (
-  <Box sx={{ py: { xs: 8, md: 12 }, background: "linear-gradient(135deg, #1C3620 0%, #2E4F32 100%)", position: "relative", overflow: "hidden" }}>
+  <Box sx={{ py: { xs: 8, md: 12 }, background: "linear-gradient(135deg, #0f766e 0%, #0f172a 100%)", position: "relative", overflow: "hidden" }}>
     <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
       <Grid container spacing={6} alignItems="center">
         <Grid item xs={12} md={6}>
           <FadeIn>
-            <Typography variant="h2" sx={{ color: "#FDFBF7", mb: 3 }}>
-              Tìm Phòng Của Bạn
+            <Typography variant="h2" sx={{ color: "#ffffff", mb: 3, fontWeight: 700 }}>
+              Tìm Không Gian Sống Ưu Ý
             </Typography>
-            <Typography variant="body1" sx={{ color: "#E6D5C3", mb: 5, fontSize: "1.1rem", lineHeight: 1.8 }}>
-              Đừng ngần ngại liên hệ hoặc đăng ký ngay hôm nay để nhận được những ưu đãi tốt nhất cho không gian sống của bạn.
+            <Typography variant="body1" sx={{ color: "#94a3b8", mb: 5, fontSize: "1.1rem", lineHeight: 1.8 }}>
+              Đừng ngần ngại liên hệ hoặc đăng ký ngay hôm nay để nhận được những ưu đãi tốt nhất cho căn hộ của bạn.
             </Typography>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Button component={Link} to="/rooms" variant="contained" size="large"
-                sx={{ borderRadius: "30px", px: 5, py: 1.8, fontSize: "1rem", background: "#A06E41", color: "#fff", "&:hover": { background: "#8B5A2B" } }}>
-                Xem phòng ngay
+                sx={{ borderRadius: "10px", px: 4, py: 1.5, fontSize: "0.95rem", fontWeight: 600, textTransform: "none", bgcolor: "#14b8a6", color: "#0f172a", "&:hover": { bgcolor: "#2dd4bf" } }}>
+                Xem danh sách phòng
               </Button>
               <Button component={Link} to="/register" variant="outlined" size="large"
-                sx={{ borderRadius: "30px", px: 5, py: 1.8, fontSize: "1rem", borderColor: "#A06E41", color: "#FDFBF7", "&:hover": { bgcolor: "rgba(160, 110, 65, 0.1)", borderColor: "#A06E41" } }}>
-                Đăng ký miễn phí
+                sx={{ borderRadius: "10px", px: 4, py: 1.5, fontSize: "0.95rem", fontWeight: 600, textTransform: "none", borderColor: "#94a3b8", color: "#ffffff", "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)", borderColor: "#ffffff" } }}>
+                Đăng ký tài khoản
               </Button>
             </Stack>
           </FadeIn>

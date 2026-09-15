@@ -23,49 +23,59 @@ const Login = () => {
         }
     }, [location]);
 
-// Login.js - phần handleLogin
-const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    // Validate dữ liệu nhập
-    if (!username.trim()) {
-        setError('Vui lòng nhập tên đăng nhập hoặc email!');
-        return;
-    }
-    if (!password) {
-        setError('Vui lòng nhập mật khẩu!');
-        return;
-    }
-    if (password.length < 4) {
-        setError('Mật khẩu không hợp lệ (phải có ít nhất 4 ký tự)!');
-        return;
-    }
-
-    setLoading(true);
-    
-    try {
-        const user = await AuthService.login(username, password);
-        console.log("🔑 [Login handleLogin] User result:", user);
-        const role = normalizeRole(user?.role);
-        console.log("🔑 [Login handleLogin] Role:", role);
-
-        toast.success(`Chào mừng ${user?.fullName || user?.username || "bạn"} trở lại!`);
-
-        if (role === 'ADMIN') {
-            window.location.href = '/admin/dashboard';
-        } else {
-            window.location.href = '/';
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError('');
+        
+        // Validate dữ liệu nhập
+        if (!username.trim()) {
+            setError('Vui lòng nhập tên đăng nhập hoặc email!');
+            return;
         }
-    } catch (err) {
-        console.error("❌ [Login handleLogin Error]:", err);
-        const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Tên đăng nhập hoặc mật khẩu không đúng';
-        setError(errorMessage);
-        toast.error(errorMessage);
-    } finally {
-        setLoading(false);
-    }
-};    return (
+        if (!password) {
+            setError('Vui lòng nhập mật khẩu!');
+            return;
+        }
+        if (password.length < 4) {
+            setError('Mật khẩu không hợp lệ (phải có ít nhất 4 ký tự)!');
+            return;
+        }
+
+        setLoading(true);
+        
+        try {
+            const user = await AuthService.login(username, password);
+            const role = normalizeRole(user?.role);
+
+            toast.success(`Chào mừng ${user?.fullName || user?.username || "bạn"} trở lại!`);
+
+            const targetPath = location.state?.from?.pathname;
+
+            if (role === 'ADMIN') {
+                window.location.href = '/admin/dashboard';
+            } else if (targetPath) {
+                window.location.href = targetPath;
+            } else {
+                window.location.href = '/';
+            }
+        } catch (err) {
+            console.error("[Login handleLogin Error]:", err);
+            let errorMessage = 'Tên đăng nhập hoặc mật khẩu không đúng!';
+            if (err.response?.status === 401) {
+                errorMessage = 'Tên đăng nhập hoặc mật khẩu không đúng! Vui lòng kiểm tra lại.';
+            } else if (err.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            } else if (err.message && err.message.includes('Network Error')) {
+                errorMessage = 'Không thể kết nối đến máy chủ Backend! Vui lòng thử lại sau.';
+            }
+            setError(errorMessage);
+            toast.error(errorMessage, { position: "top-center", autoClose: 5000 });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
         <Box sx={{ 
             minHeight: '100vh', 
             display: 'flex', 
@@ -139,7 +149,7 @@ const handleLogin = async (e) => {
                         </Box>
                         
                         {error && (
-                            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                            <Alert severity="error" sx={{ mb: 3, borderRadius: 2, fontWeight: 600 }}>
                                 {error}
                             </Alert>
                         )}
@@ -151,9 +161,10 @@ const handleLogin = async (e) => {
                                 margin="normal"
                                 variant="outlined"
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                onChange={(e) => { setUsername(e.target.value); setError(''); }}
                                 autoComplete="username"
                                 disabled={loading}
+                                error={!!error}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 2,
@@ -171,9 +182,10 @@ const handleLogin = async (e) => {
                                 margin="normal"
                                 variant="outlined"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => { setPassword(e.target.value); setError(''); }}
                                 autoComplete="current-password"
                                 disabled={loading}
+                                error={!!error}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 2,

@@ -1,12 +1,12 @@
-/**
- * @file RoomActionBox.jsx
- * @description Khối giao diện hiển thị giá tiền nổi bật và nút Call to Action "Đăng ký thuê ngay", được dán cố định (sticky) bên phải trang web.
- * @module components/roomDetail
- */
 import React from "react";
 import { Box, Typography, Stack, Divider, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-import { StarRate as StarRateIcon } from "@mui/icons-material";
+import {
+  StarRate as StarRateIcon,
+  Security as SecurityIcon,
+  Assignment as AssignmentIcon,
+  Speed as SpeedIcon,
+} from "@mui/icons-material";
 import { motion } from "framer-motion";
 
 const RoomActionBox = ({ room, status, handleRentClick }) => (
@@ -77,7 +77,7 @@ const RoomActionBox = ({ room, status, handleRentClick }) => (
               transition: "all 0.25s",
             }}
           >
-            {room.status === "AVAILABLE" ? "🏠 Đăng ký thuê ngay" : "Phòng không còn trống"}
+            {room.status === "AVAILABLE" ? "Đăng ký thuê ngay" : "Phòng không còn trống"}
           </Button>
 
           <Typography
@@ -90,12 +90,12 @@ const RoomActionBox = ({ room, status, handleRentClick }) => (
           {/* Trust badges */}
           <Stack spacing={1.5} mt={3} pt={3} sx={{ borderTop: "1px solid #f1f5f9" }}>
             {[
-              { icon: "🔒", text: "Thông tin của bạn được bảo mật" },
-              { icon: "📋", text: "Hợp đồng điện tử minh bạch" },
-              { icon: "⚡", text: "Xét duyệt nhanh trong 24h" },
+              { icon: <SecurityIcon sx={{ fontSize: 18, color: "#0f766e" }} />, text: "Thông tin của bạn được bảo mật" },
+              { icon: <AssignmentIcon sx={{ fontSize: 18, color: "#0f766e" }} />, text: "Hợp đồng điện tử minh bạch" },
+              { icon: <SpeedIcon sx={{ fontSize: 18, color: "#0f766e" }} />, text: "Xét duyệt nhanh trong 24h" },
             ].map((t, i) => (
               <Stack key={i} direction="row" alignItems="center" spacing={1.5}>
-                <Typography fontSize="1rem">{t.icon}</Typography>
+                {t.icon}
                 <Typography variant="body2" color="text.secondary" fontWeight={600}>{t.text}</Typography>
               </Stack>
             ))}

@@ -105,7 +105,7 @@ const ReportMain = () => {
         });
       }
     } catch (error) {
-      console.error("❌ Lỗi tải báo cáo:", error);
+      console.error("Lỗi tải báo cáo:", error);
       toast.error("Không thể tải dữ liệu báo cáo");
     } finally {
       setLoading(false);
@@ -284,7 +284,7 @@ const ReportMain = () => {
             <Grid container spacing={3} alignItems="center">
               <Grid item xs={12} md={5}>
                 <DatePicker
-                  label="📅 Từ ngày"
+                  label="Từ ngày"
                   value={dateRange.startDate}
                   onChange={(newValue) =>
                     setDateRange((prev) => ({ ...prev, startDate: newValue }))
@@ -294,7 +294,7 @@ const ReportMain = () => {
               </Grid>
               <Grid item xs={12} md={5}>
                 <DatePicker
-                  label="📅 Đến ngày"
+                  label="Đến ngày"
                   value={dateRange.endDate}
                   onChange={(newValue) =>
                     setDateRange((prev) => ({ ...prev, endDate: newValue }))
@@ -391,9 +391,9 @@ const ReportMain = () => {
           {/* Tabs */}
           <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
             <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
-              <Tab label="📊 Tổng quan" />
-              <Tab label="📈 Biểu đồ doanh thu" />
-              <Tab label="📋 Chi tiết hóa đơn" />
+              <Tab label="Tổng quan" />
+              <Tab label="Biểu đồ doanh thu" />
+              <Tab label="Chi tiết hóa đơn" />
             </Tabs>
           </Box>
 

@@ -30,14 +30,14 @@ import api from "../../../services/api";
 
 // Enum Options
 const SERVICE_CATEGORIES = [
-  { value: "WATER", label: "💧 Nước", color: "#0f766e" },
-  { value: "ELECTRICITY", label: "⚡ Điện", color: "#f59e0b" },
-  { value: "GARBAGE", label: "🗑️ Rác", color: "#10b981" },
-  { value: "INTERNET", label: "📡 Internet", color: "#3b82f6" },
-  { value: "SECURITY", label: "🔒 An ninh", color: "#8b5cf6" },
-  { value: "CLEANING", label: "🧹 Vệ sinh", color: "#ec4898" },
-  { value: "MAINTENANCE", label: "🔧 Bảo trì", color: "#ef4444" },
-  { value: "OTHER", label: "📝 Khác", color: "#94a3b8" },
+  { value: "WATER", label: "Nước", color: "#0f766e" },
+  { value: "ELECTRICITY", label: "Điện", color: "#f59e0b" },
+  { value: "GARBAGE", label: "Rác", color: "#10b981" },
+  { value: "INTERNET", label: "Internet", color: "#3b82f6" },
+  { value: "SECURITY", label: "An ninh", color: "#8b5cf6" },
+  { value: "CLEANING", label: "Vệ sinh", color: "#ec4898" },
+  { value: "MAINTENANCE", label: "Bảo trì", color: "#ef4444" },
+  { value: "OTHER", label: "Khác", color: "#94a3b8" },
 ];
 
 const SERVICE_UNITS = [
@@ -152,7 +152,7 @@ const ServiceForm = ({ initialData, isEdit, serviceId }) => {
             </Avatar>
             <Box>
               <Typography variant="h5" fontWeight={800}>
-                {isEdit ? "✏️ Chỉnh sửa dịch vụ" : "➕ Thêm dịch vụ mới"}
+                {isEdit ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Dịch vụ phụ như điện, nước, internet, rác, trông xe...
@@ -258,15 +258,14 @@ const ServiceForm = ({ initialData, isEdit, serviceId }) => {
                         color="success"
                       />
                     }
-                    label={form.active ? "🟢 Đang hoạt động" : "🔴 Đã ngưng cung cấp"}
+                    label={form.active ? "Đang hoạt động" : "Đã ngưng cung cấp"}
                   />
                 </Grid>
               )}
             </Grid>
 
-            {/* Alert Info */}
             <Alert severity="info" sx={{ mt: 3, borderRadius: 2 }}>
-              <Typography variant="body2" fontWeight={500}>💡 Lưu ý:</Typography>
+              <Typography variant="body2" fontWeight={600}>Lưu ý:</Typography>
               <Typography variant="caption" color="text.secondary">
                 • Dịch vụ sau khi tạo có thể được gán cho từng phòng riêng biệt<br />
                 • Giá dịch vụ có thể thay đổi theo thời gian<br />

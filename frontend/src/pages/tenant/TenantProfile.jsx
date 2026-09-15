@@ -26,6 +26,7 @@ import {
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import { CONTACT_INFO } from "../../config";
 
 const TenantProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -272,10 +273,10 @@ const TenantProfile = () => {
               Cần hỗ trợ? Liên hệ với chúng tôi qua:
             </Typography>
             <Typography variant="body2">
-              📞 Hotline: <strong>0123 456 789</strong>
+              Hotline: <strong>{CONTACT_INFO.phone}</strong>
             </Typography>
             <Typography variant="body2">
-              📧 Email: <strong>support@smartphongtro.com</strong>
+              Email: <strong>{CONTACT_INFO.email}</strong>
             </Typography>
           </Paper>
         </Grid>

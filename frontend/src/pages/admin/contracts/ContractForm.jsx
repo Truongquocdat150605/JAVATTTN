@@ -103,7 +103,7 @@ const ContractForm = ({ isEdit, formData, editFormData, newTenantForm, handleCha
         // ========== FORM TẠO HỢP ĐỒNG MỚI (Có nhập thông tin khách thuê) ==========
         <Box>
           <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: "#0f766e" }}>
-            📝 Thông tin khách thuê mới
+            Thông tin khách thuê mới
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Hệ thống sẽ tự động tạo tài khoản nếu số điện thoại chưa tồn tại (mật khẩu mặc định: 123456)
@@ -130,7 +130,7 @@ const ContractForm = ({ isEdit, formData, editFormData, newTenantForm, handleCha
           <Divider sx={{ mb: 4 }} />
 
           <Typography variant="h6" fontWeight={700} sx={{ mb: 3, color: "#0f766e" }}>
-            📄 Chi tiết hợp đồng
+            Chi tiết hợp đồng
           </Typography>
 
           <Grid container spacing={3}>

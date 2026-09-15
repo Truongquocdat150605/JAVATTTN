@@ -5,8 +5,8 @@
  */
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Container, Paper, Typography, Grid, Button, Skeleton } from "@mui/material";
-import { MeetingRoom, Description, Receipt, People, AttachMoney, Pending, LocalHospital, EventNote, Apartment, ReceiptLong } from "@mui/icons-material";
+import { Box, Container, Paper, Typography, Grid, Button, Skeleton, Alert, AlertTitle } from "@mui/material";
+import { MeetingRoom, Description, Receipt, People, AttachMoney, Pending, LocalHospital, EventNote, Apartment, ReceiptLong, Warning } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
@@ -22,6 +22,7 @@ const AdminDashboard = () => {
     availableRooms: 0, occupiedRooms: 0, unpaidInvoices: 0,
     pendingContracts: 0, pendingRequests: 0, pendingMaintenance: 0,
   });
+  const [expiringContracts, setExpiringContracts] = useState([]);
   const [recentContracts, setRecentContracts] = useState([]);
   const [recentRequests, setRecentRequests] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -35,15 +36,24 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, contractsRes, requestsRes] = await Promise.all([
+      const [statsRes, contractsRes, requestsRes, allContractsRes] = await Promise.all([
         api.get("/admin/dashboard/stats"),
         api.get("/contracts/recent").catch(() => []),
         api.get("/admin/requests/rental/recent").catch(() => []),
+        api.get("/contracts").catch(() => []),
       ]);
 
       if (statsRes?.success && statsRes?.data) setStats(statsRes.data);
       if (Array.isArray(contractsRes)) setRecentContracts(sortNewestFirst(contractsRes, ["lastModifiedDate", "updatedAt", "createdAt", "startDate", "id"]).slice(0, 5));
       if (Array.isArray(requestsRes)) setRecentRequests(sortNewestFirst(requestsRes, ["updatedAt", "lastModifiedDate", "createdAt", "desiredMoveInDate", "id"]).slice(0, 5));
+
+      const contractsList = Array.isArray(allContractsRes) ? allContractsRes : (Array.isArray(allContractsRes?.data) ? allContractsRes.data : []);
+      const expiring = contractsList.filter(c => {
+        if (!c.endDate || c.status !== "ACTIVE") return false;
+        const diff = (new Date(c.endDate) - new Date()) / (1000 * 60 * 60 * 24);
+        return diff >= 0 && diff <= 30;
+      });
+      setExpiringContracts(expiring);
     } catch (error) {
       console.error("Lỗi tải dashboard:", error);
       toast.error("Không thể tải dữ liệu dashboard");
@@ -98,6 +108,23 @@ const AdminDashboard = () => {
             . Dưới đây là tổng quan hệ thống của bạn.
           </Typography>
         </Box>
+
+        {/* Expiring Contracts Alert */}
+        {expiringContracts.length > 0 && (
+          <Alert 
+            severity="warning" 
+            icon={<Warning sx={{ fontSize: 28 }} />}
+            action={
+              <Button component={Link} to="/admin/contracts" color="inherit" size="small" sx={{ fontWeight: 700 }}>
+                Xem danh sách
+              </Button>
+            }
+            sx={{ mb: 4, borderRadius: 3, boxShadow: "0 4px 14px rgba(245,158,11,0.15)", bgcolor: "#fffbeb", border: "1px solid #fde68a" }}
+          >
+            <AlertTitle sx={{ fontWeight: 800 }}>CẢNH BÁO HỢP ĐỒNG SẮP HẾT HẠN ({expiringContracts.length})</AlertTitle>
+            Có <strong>{expiringContracts.length} hợp đồng</strong> sẽ hết hạn trong 30 ngày tới ({expiringContracts.map(c => `Phòng ${c.room?.roomNumber || c.roomId}`).join(", ")}). Vui lòng kiểm tra để liên hệ khách gia hạn hoặc làm thủ tục thanh lý!
+          </Alert>
+        )}
 
         {/* Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
