@@ -75,8 +75,8 @@ REACT_APP_GEMINI_API_KEY=[TODO: Optional Gemini API Key]
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Truongquocdat150605/JAVATTTN.git
-   cd JAVATTTN/frontend
+   git clone https://github.com/Truongquocdat150605/quan-ly-phong-tro-frontend.git
+   cd quan-ly-phong-tro-frontend
    ```
 
 2. **Install dependencies:**
